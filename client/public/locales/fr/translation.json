@@ -1,12 +1,11 @@
 {
-    "titre": "Senseurs Passifs",
+    "titre": "Documents",
     "application": {
-        "nom": "Senseurs Passifs"
+        "nom": "Documents"
     },
     "menu": {
-        "instances": "Instances",
-        "configuration": "Configuration",
-        "domaines": "Domaines",
+        "groupes": "Groupes",
+        "categories": "Categories",
         "information": "Information",
         "language": "Language",
         "portail": "Portail",

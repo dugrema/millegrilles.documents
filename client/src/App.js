@@ -31,6 +31,7 @@ import './index.scss'
 import './App.css'
 
 const Accueil = React.lazy( () => import('./Accueil') )
+const EditerCategorie = React.lazy( () => import('./EditerCategorie') )
 
 function App() {
   
@@ -126,6 +127,17 @@ function ApplicationDocuments(props) {
 
   const { sectionAfficher, setSectionAfficher} = props
 
+  const [groupeId, setGroupeId] = useState('')
+  const [categorieId, setCategorieId] = useState('')
+
+  const fermerCategorieHandler = useCallback(()=>setCategorieId(false), [setCategorieId])
+
+  if(categorieId) {
+    return (
+        <EditerCategorie categorieId={categorieId} fermer={fermerCategorieHandler} />
+    )
+  }
+
   let Page = null
   switch(sectionAfficher) {
     default:
@@ -134,7 +146,9 @@ function ApplicationDocuments(props) {
 
   return (
     <Container className="main-body">
-      <Page setSectionAfficher={setSectionAfficher} />
+      <Page setSectionAfficher={setSectionAfficher} 
+            setGroupeId={setGroupeId}
+            setCategorieId={setCategorieId} />
     </Container>
   )
 
@@ -180,9 +194,13 @@ function MenuApp(props) {
       <>
           <MenuMillegrilles brand={brand} labelMenu="Menu" etatConnexion={etatConnexion} onSelect={handlerSelect}>
 
-            {estProprietaire?
-              'Proprio'
-            :''}
+            <Nav.Link eventKey="groupes" title={t('menu.groupes')}>
+                {t('menu.groupes')}
+            </Nav.Link>
+
+            <Nav.Link eventKey="categories" title={t('menu.categories')}>
+                {t('menu.categories')}
+            </Nav.Link>
 
             <Nav.Link eventKey="information" title="Afficher l'information systeme">
                 {t('menu.information')}
