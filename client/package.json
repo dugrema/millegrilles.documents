@@ -1,0 +1,54 @@
+{
+  "name": "millegrilles.documents.client",
+  "version": "2022.9.0",
+  "private": true,
+  "dependencies": {
+    "@dugrema/millegrilles.reactjs": "github:dugrema/millegrilles.reactjs#2022.9",
+    "buffer": "^6.0.3",
+    "comlink": "^4.3.1",
+    "crypto-browserify": "^3.12.0",
+    "font-awesome": "~4.7.0",
+    "i18next": "^21.9.0",
+    "i18next-browser-languagedetector": "^6.1.8",
+    "i18next-http-backend": "^1.4.4",
+    "path-browserify": "^1.0.1",
+    "react": "^18.2.0",
+    "react-app-rewired": "^2.2.1",
+    "react-bootstrap": "^2.5.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^11.18.3",
+    "react-scripts": "5.0.1",
+    "sass": "^1.55.0",
+    "stream-browserify": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@reduxjs/toolkit": "^1.8",
+    "@dugrema/millegrilles.utiljs": "github:dugrema/millegrilles.utiljs#2022.9",
+    "bootstrap": "^5.1",
+    "idb": "^7",
+    "socket.io-client": "^4",
+    "react-redux": "^8.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "BABEL_ENV=production react-app-rewired build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "https://localhost:3043",
+  "homepage": "/documents"
+}

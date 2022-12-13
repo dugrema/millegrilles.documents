@@ -1,7 +1,6 @@
 import debugLib from 'debug'
 const debug = debugLib('mqdao')
 
-// const L3Protege = '3.protege'
 const L2Prive = '2.prive'
 
 const DOMAINE_DOCUMENTS = 'Documents'

@@ -5,7 +5,7 @@ import server6 from '@dugrema/millegrilles.nodejs/src/server6.js'
 import forgecommon from '@dugrema/millegrilles.utiljs/src/forgecommon.js'
 
 import { configurerEvenements } from './appSocketIo.js'
-import routeDocuments from './routes/documents.js'
+import routeDocuments from '../routes/documents.js'
 import * as mqdao from './mqdao.js'
 
 const debug = debugLib('app')
