@@ -7,7 +7,6 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import useWorkers, { useEtatPret } from './WorkerContext'
-
 import { setCategorieId, pushItems, mergeItems, clearItems } from './redux/categoriesSlice'
 
 const EditerCategorie = React.lazy( () => import('./EditerCategorie') )

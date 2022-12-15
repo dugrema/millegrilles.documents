@@ -1,9 +1,5 @@
 import { expose } from 'comlink'
 import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClient'
-// import { hacheurs } from '@dugrema/millegrilles.reactjs'
-// import { setHacheurs } from '@dugrema/millegrilles.utiljs'
-
-// setHacheurs(hacheurs)
 
 const CONST_DOMAINE_DOCUMENTS = 'Documents'
 
@@ -15,6 +11,19 @@ function getCategoriesUsager(requete) {
     {
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'getCategoriesUsager', 
+      ajouterCertificat: true,
+    }
+  )
+}
+
+function getGroupesUsager(requete) {
+  requete = requete || {}
+  return ConnexionClient.emitBlocking(
+    'getGroupesUsager', 
+    requete, 
+    {
+      domaine: CONST_DOMAINE_DOCUMENTS, 
+      action: 'getGroupesUsager', 
       ajouterCertificat: true,
     }
   )
@@ -32,6 +41,18 @@ function sauvegarderCategorieUsager(categorie) {
   )
 }
 
+function sauvegarderGroupeUsager(groupe) {
+  return ConnexionClient.emitBlocking(
+    'sauvegarderGroupeUsager', 
+    groupe, 
+    {
+      domaine: CONST_DOMAINE_DOCUMENTS, 
+      action: 'sauvegarderGroupeUsager', 
+      ajouterCertificat: true,
+    }
+  )
+}
+
 // Evenements
 
 async function ecouterEvenementsCategoriesUsager(cb) {
@@ -42,15 +63,24 @@ async function retirerEvenementsCategoriesUsager(cb) {
   return ConnexionClient.unsubscribe('retirerEvenementsCategoriesUsager', cb, {}) 
 }
 
+async function ecouterEvenementsGroupesUsager(cb) {
+  return ConnexionClient.subscribe('ecouterEvenementsGroupesUsager', cb, {}) 
+}
+
+async function retirerEvenementsGroupesUsager(cb) {
+  return ConnexionClient.unsubscribe('retirerEvenementsGroupesUsager', cb, {}) 
+}
+
 // Exposer methodes du Worker
 expose({
     ...ConnexionClient, 
 
     // Requetes et commandes privees
-    getCategoriesUsager,
-    sauvegarderCategorieUsager,
+    getCategoriesUsager, getGroupesUsager,
+    sauvegarderCategorieUsager, sauvegarderGroupeUsager,
 
     // Event listeners proteges
     ecouterEvenementsCategoriesUsager, retirerEvenementsCategoriesUsager,
+    ecouterEvenementsGroupesUsager, retirerEvenementsGroupesUsager,
 
 })

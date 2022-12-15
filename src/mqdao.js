@@ -20,8 +20,16 @@ export function getCategoriesUsager(socket, params) {
     return transmettreRequete(socket, params, 'getCategoriesUsager')
 }
 
+export function getGroupesUsager(socket, params) {
+    return transmettreRequete(socket, params, 'getGroupesUsager')
+}
+
 export function sauvegarderCategorieUsager(socket, params) {
     return transmettreCommande(socket, params, 'sauvegarderCategorieUsager')
+}
+
+export function sauvegarderGroupeUsager(socket, params) {
+    return transmettreCommande(socket, params, 'sauvegarderGroupeUsager')
 }
 
 async function transmettreRequete(socket, params, action, opts) {
@@ -83,6 +91,21 @@ export async function ecouterEvenementsCategoriesUsager(socket, cb) {
 export async function retirerEvenementsCategoriesUsager(socket, cb) {
     const routingKeys = [
         `evenement.Documents.${socket.userId}.sauvegarderCategorieUsager`,
+    ]
+    socket.unsubscribe({routingKeys, exchanges: [L2Prive]})
+    if(cb) cb(true)
+}
+
+export async function ecouterEvenementsGroupesUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderGroupeUsager`,
+    ]
+    socket.subscribe({routingKeys, exchanges: [L2Prive]}, cb)
+}
+
+export async function retirerEvenementsGroupesUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderGroupeUsager`,
     ]
     socket.unsubscribe({routingKeys, exchanges: [L2Prive]})
     if(cb) cb(true)

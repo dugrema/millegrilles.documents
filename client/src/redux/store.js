@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import categoriesSlice from './categoriesSlice'
+import groupesSlice from './groupesSlice'
 
 function storeSetup(workers) {
 
@@ -8,6 +9,7 @@ function storeSetup(workers) {
 
     reducer: { 
       categories: categoriesSlice, 
+      groupes: groupesSlice,
     },
 
     middleware: (getDefaultMiddleware) => {
