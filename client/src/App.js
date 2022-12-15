@@ -31,7 +31,8 @@ import './index.scss'
 import './App.css'
 
 const Accueil = React.lazy( () => import('./Accueil') )
-const EditerCategorie = React.lazy( () => import('./EditerCategorie') )
+const Categories = React.lazy( () => import('./Categories') )
+const Groupes = React.lazy( () => import('./Groupes') )
 
 function App() {
   
@@ -127,28 +128,17 @@ function ApplicationDocuments(props) {
 
   const { sectionAfficher, setSectionAfficher} = props
 
-  const [groupeId, setGroupeId] = useState('')
-  const [categorieId, setCategorieId] = useState('')
-
-  const fermerCategorieHandler = useCallback(()=>setCategorieId(false), [setCategorieId])
-
-  if(categorieId) {
-    return (
-        <EditerCategorie categorieId={categorieId} fermer={fermerCategorieHandler} />
-    )
-  }
-
   let Page = null
   switch(sectionAfficher) {
+    case 'Categories': Page = Categories; break
+    case 'Groupes': Page = Groupes; break
     default:
       Page = Accueil
   }
 
   return (
     <Container className="main-body">
-      <Page setSectionAfficher={setSectionAfficher} 
-            setGroupeId={setGroupeId}
-            setCategorieId={setCategorieId} />
+      <Page setSectionAfficher={setSectionAfficher} />
     </Container>
   )
 
@@ -173,6 +163,8 @@ function MenuApp(props) {
 
   const handlerSelect = useCallback(eventKey => {
       switch(eventKey) {
+        case 'groupes': setSectionAfficher('Groupes'); break
+        case 'categories': setSectionAfficher('Categories'); break
         case 'portail': window.location = '/millegrilles'; break
         case 'deconnecter': window.location = '/millegrilles/authentification/fermer'; break
         case 'information': setShowModalInfo(true); break

@@ -9,13 +9,7 @@ import useWorkers from './WorkerContext'
 
 function EditerCategorie(props) {
 
-    const { categorieId, fermer } = props
-
-    const categorie = useMemo(()=>{
-        if(!categorieId) return ''
-        if(categorieId === true) return {}
-        throw new Error("todo - Charger categorie")
-    }, [categorieId])
+    const { categorie, fermer } = props
 
     if(!categorie) return ''
 
@@ -76,7 +70,8 @@ function FormCategorie(props) {
     const sauvegarderCategorieHandler = useCallback(()=>{
         console.debug("Sauvegarder %s : %O", nomCategorie, champs)
 
-        let versionCategorie = 1
+        const categorieId = categorie.categorie_id
+        let versionCategorie = null
         if(categorie.version) {
             // Optimistic locking pour prochaine version
             versionCategorie = categorie.version + 1
@@ -85,10 +80,11 @@ function FormCategorie(props) {
         const commande = {
             nom_categorie: nomCategorie,
             champs,
+            categorie_id: categorieId,
             version: versionCategorie,
         }
 
-        workers.connexion.sauvegarderCategorie(commande)
+        workers.connexion.sauvegarderCategorieUsager(commande)
             .then(reponse=>{
                 console.debug("Reponse sauvegarder categorie : ", reponse)
                 fermer()

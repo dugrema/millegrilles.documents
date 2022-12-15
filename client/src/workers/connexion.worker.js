@@ -7,22 +7,30 @@ import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionCli
 
 const CONST_DOMAINE_DOCUMENTS = 'Documents'
 
-// function getListeSenseursNoeud(instance_id, opts) {
-//   opts = opts || {}
-//   const partition = opts.partition || instance_id
-//   console.debug("getListeSenseursNoeud, instance_id: %s", instance_id)
-//   return ConnexionClient.emitBlocking(
-//     'getListeSenseursNoeud', 
-//     {instance_id}, 
-//     {
-//       domaine: CONST_DOMAINE_DOCUMENTS, 
-//       action: 'listeSenseursPourNoeud', 
-//       ajouterCertificat: true,
-//       partition,
-//     }
-//   )
-// }
+function getCategoriesUsager(requete) {
+  requete = requete || {}
+  return ConnexionClient.emitBlocking(
+    'getCategoriesUsager', 
+    requete, 
+    {
+      domaine: CONST_DOMAINE_DOCUMENTS, 
+      action: 'getCategoriesUsager', 
+      ajouterCertificat: true,
+    }
+  )
+}
 
+function sauvegarderCategorieUsager(categorie) {
+  return ConnexionClient.emitBlocking(
+    'sauvegarderCategorieUsager', 
+    categorie, 
+    {
+      domaine: CONST_DOMAINE_DOCUMENTS, 
+      action: 'sauvegarderCategorieUsager', 
+      ajouterCertificat: true,
+    }
+  )
+}
 
 // Evenements
 
@@ -50,6 +58,8 @@ expose({
     ...ConnexionClient, 
 
     // Requetes et commandes privees
+    getCategoriesUsager,
+    sauvegarderCategorieUsager,
 
     // Event listeners proteges
 
