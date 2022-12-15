@@ -77,9 +77,19 @@ function FormCategorie(props) {
             versionCategorie = categorie.version + 1
         }
 
+        const champsMappes = champs.map(item=>{
+            const champs = {...item}
+            try {
+                champs.taille_maximum = Number.parseInt(champs.taille_maximum)
+            } catch(err) {
+                champs.taille_maximum = null
+            }
+            return champs
+        })
+
         const commande = {
             nom_categorie: nomCategorie,
-            champs,
+            champs: champsMappes,
             categorie_id: categorieId,
             version: versionCategorie,
         }
@@ -136,7 +146,7 @@ function FormChamp(props) {
     const nomChampChangeHandler = useCallback(event=>champChangeHandler('nom_champ', event), [champChangeHandler])
     const codeInterneChangeHandler = useCallback(event=>champChangeHandler('code_interne', event), [champChangeHandler])
     const typeChampChangeHandler = useCallback(event=>champChangeHandler('type_champ', event), [champChangeHandler])
-    const tailleMaximumChangeHandler = useCallback(event=>champChangeHandler('taille_maximum', event), [champChangeHandler])
+    const tailleMaximumChangeHandler = useCallback(event=>champChangeHandler('taille_maximum', event, 'int'), [champChangeHandler])
     const requisChangeHandler = useCallback(event=>champChangeHandler('requis', event), [champChangeHandler])
 
     if(!champ) return ''
