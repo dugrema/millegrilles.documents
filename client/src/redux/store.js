@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import documentsSlice from './documentsSlice'
+import categoriesSlice from './categoriesSlice'
 
 function storeSetup(workers) {
 
@@ -7,7 +7,7 @@ function storeSetup(workers) {
   const store = configureStore({
 
     reducer: { 
-      documents: documentsSlice, 
+      categories: categoriesSlice, 
     },
 
     middleware: (getDefaultMiddleware) => {

@@ -12,8 +12,6 @@ import ErrorBoundary from './ErrorBoundary'
 import useWorkers, {useEtatConnexion, WorkerProvider, useUsager, useFormatteurPret, useInfoConnexion} from './WorkerContext'
 import storeSetup from './redux/store'
 
-import { setUserId as setUserIdDocuments } from './redux/documentsSlice'
-
 import { useTranslation } from 'react-i18next'
 import './i18n'
 
@@ -68,7 +66,6 @@ function LayoutMain(props) {
 
   const { i18n, t } = useTranslation()
 
-  const dispatch = useDispatch()
   const workers = useWorkers()
   const usager = useUsager()
   const etatConnexion = useEtatConnexion()
@@ -89,7 +86,7 @@ function LayoutMain(props) {
   }, [usager])
 
   // Setup userId dans redux
-  useEffect(()=>{dispatch(setUserIdDocuments(userId))}, [userId])
+  //useEffect(()=>{dispatch(setUserIdDocuments(userId))}, [userId])
 
   const menu = (
     <MenuApp 
