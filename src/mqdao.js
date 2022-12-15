@@ -73,29 +73,17 @@ function verifierMessage(message, domaine, action) {
     if(actionRecue !== action) throw new Error(`Mismatch action (${actionRecue} !== ${action})"`)
 }
 
-// export async function ecouterEvenementsAppareilsUsager(socket, cb) {
-//     const opts = {
-//         routingKeys: [
-//             /*`evenement.SenseursPassifs.${socket.userId}.lectureConfirmee`,
-//             `evenement.SenseursPassifs.${socket.userId}.majAppareil`,*/
-//         ],
-//         exchanges: [L2Prive],
-//         // userId: socket.userId,
-//     }
-//     console.debug("ecouterEvenementsAppareilsUsager sur ", opts)
-//     socket.subscribe(opts, cb)
-// }
+export async function ecouterEvenementsCategoriesUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderCategorieUsager`,
+    ]
+    socket.subscribe({routingKeys, exchanges: [L2Prive]}, cb)
+}
 
-// export async function retirerEvenementsAppareilsUsager(socket, cb) {
-//     const routingKeys = [
-//         /*`evenement.SenseursPassifs.${socket.userId}.lectureConfirmee`,
-//         `evenement.SenseursPassifs.${socket.userId}.majAppareil`,*/
-//     ]
-//     socket.unsubscribe({
-//         routingKeys, 
-//         exchanges: [L2Prive],
-//         // userId: socket.userId,
-//     })
-//     if(cb) cb(true)
-// }
-
+export async function retirerEvenementsCategoriesUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderCategorieUsager`,
+    ]
+    socket.unsubscribe({routingKeys, exchanges: [L2Prive]})
+    if(cb) cb(true)
+}

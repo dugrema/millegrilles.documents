@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
+import { proxy as comlinkProxy } from 'comlink'
 
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
@@ -25,6 +26,11 @@ function Categories(props) {
     const nouvelleCategorieHandler = useCallback(()=>setCategorieId(true), [setCategorieId])
     const fermerEditerCategorieHandler = useCallback(()=>setCategorieId(''), [setCategorieId])
 
+    const categoriesChangeesHandler = useCallback(comlinkProxy(message => {
+        console.debug("Message recu : %O", message)
+        // traiterLecture(instance.instance_id, message, _contexteCallback.listeSenseurs, _contexteCallback.setListeSenseurs)
+      }), [setCategories])
+    
     useEffect(()=>{
         if(!etatPret) return
 
@@ -35,7 +41,15 @@ function Categories(props) {
                 setCategories('')
             })
             .catch(err=>console.error("Erreur chargement categories : ", err))
-    }, [workers, etatPret, setCategories])
+
+        workers.connexion.ecouterEvenementsCategoriesUsager(categoriesChangeesHandler)
+            .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
+        return () => { 
+            workers.connexion.retirerEvenementsCategoriesUsager()
+                .catch(err=>console.warn("Erreur retrait listener categories ", err))
+        }
+      
+    }, [workers, etatPret, setCategories, categoriesChangeesHandler])
 
     if(categorie) {
         return (

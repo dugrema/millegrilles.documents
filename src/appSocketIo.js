@@ -17,7 +17,8 @@ export function configurerEvenements(socket) {
       {eventName: 'sauvegarderCategorieUsager', callback: (params, cb) => traiter(socket, mqdao.sauvegarderCategorieUsager, {params, cb}) },
 
       // Listeners
-      // {eventName: 'ecouterEvenementsAppareilsUsager', callback: (_, cb) => {mqdao.ecouterEvenementsAppareilsUsager(socket, cb)}},
+      {eventName: 'ecouterEvenementsCategoriesUsager', callback: (_, cb) => {mqdao.ecouterEvenementsCategoriesUsager(socket, cb)}},
+      {eventName: 'retirerEvenementsCategoriesUsager', callback: (_, cb) => {mqdao.retirerEvenementsCategoriesUsager(socket, cb)}},
     ]
   }
 

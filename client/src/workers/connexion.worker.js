@@ -34,24 +34,13 @@ function sauvegarderCategorieUsager(categorie) {
 
 // Evenements
 
-// async function ecouterEvenementsAppareilsUsager(cb) {
-//   // console.debug("ecouterEvenementsAppareilsUsager cb")
-//   // ConnexionClient.socketOn('evenement.SenseursPassifs.lectureConfirmee', cb)
-//   // const resultat = await ConnexionClient.emitBlocking('ecouterEvenementsAppareilsUsager', {}, {noformat: true})
-//   // if(!resultat) {
-//   //   throw new Error("Erreur ecouterEvenementsAppareilsUsager")
-//   // }
-//   return ConnexionClient.subscribe('ecouterEvenementsAppareilsUsager', cb, {}) 
-// }
+async function ecouterEvenementsCategoriesUsager(cb) {
+  return ConnexionClient.subscribe('ecouterEvenementsCategoriesUsager', cb, {}) 
+}
 
-// async function retirerEvenementsAppareilsUsager(cb) {
-//   // ConnexionClient.socketOff('evenement.SenseursPassifs.lectureConfirmee')
-//   // const resultat = await ConnexionClient.emitBlocking('retirerEvenementsAppareilsUsager', {}, {noformat: true})
-//   // if(!resultat) {
-//   //   throw new Error("Erreur retirerEvenementsAppareilsUsager")
-//   // }
-//   return ConnexionClient.unsubscribe('retirerEvenementsAppareilsUsager', cb, {}) 
-// }
+async function retirerEvenementsCategoriesUsager(cb) {
+  return ConnexionClient.unsubscribe('retirerEvenementsCategoriesUsager', cb, {}) 
+}
 
 // Exposer methodes du Worker
 expose({
@@ -62,5 +51,6 @@ expose({
     sauvegarderCategorieUsager,
 
     // Event listeners proteges
+    ecouterEvenementsCategoriesUsager, retirerEvenementsCategoriesUsager,
 
 })
