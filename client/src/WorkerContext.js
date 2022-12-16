@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react'
 import { setupWorkers, cleanupWorkers } from './workers/workerLoader'
-// import { init as initCollectionsIdb } from './redux/collectionsIdbDao'
+import { init as initDocumentsIdb } from './redux/documentsIdbDao'
 
 const CONST_INTERVAL_VERIF_SESSION = 600_000
 
@@ -62,14 +62,13 @@ export function WorkerProvider(props) {
         // console.info("Initialiser web workers (ready : %O, workers : %O)", ready, _workers)
 
         // Initialiser workers et tables collections dans IDB
-        // const promiseIdb = initCollectionsIdb()
-        // Promise.all([ready, promiseIdb])
-        //     .then(()=>{
-        //         console.info("Workers prets")
-        //         setWorkersPrets(true)
-        //     })
-        //     .catch(err=>console.error("Erreur initialisation collections IDB / workers ", err))
-        setWorkersPrets(true)
+        const promiseIdb = initDocumentsIdb()
+        Promise.all([ready, promiseIdb])
+            .then(()=>{
+                console.info("Workers prets")
+                setWorkersPrets(true)
+            })
+            .catch(err=>console.error("Erreur initialisation collections IDB / workers ", err))
         
         // Cleanup
         // return () => { 

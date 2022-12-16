@@ -14,6 +14,7 @@ import useWorkers, {useEtatPret, useEtatConnexion, WorkerProvider, useUsager, us
 import storeSetup from './redux/store'
 
 import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems } from './redux/categoriesSlice'
+import { pushItems as groupesPushItems, mergeItems as groupesMergeItems } from './redux/groupesSlice'
 
 import { useTranslation } from 'react-i18next'
 import './i18n'
@@ -136,6 +137,10 @@ function ApplicationDocuments(props) {
     dispatch(categoriesMergeItems(message.message))
   }), [dispatch])
 
+  const groupesMajHandler = useCallback(comlinkProxy(message => {
+    dispatch(groupesMergeItems(message.message))
+  }), [dispatch])
+
   useEffect(()=>{
     if(!etatPret) return
 
@@ -148,16 +153,27 @@ function ApplicationDocuments(props) {
       })
       .catch(err=>console.error("Erreur chargement categories : ", err))
 
+    workers.connexion.getGroupesUsager()
+      .then(reponse=>{
+        if(reponse.groupes) {
+          return dispatch(groupesPushItems({liste: reponse.groupes, clear: true}))
+        }
+      })
+      .catch(err=>console.error("Erreur chargement groupes : ", err))
+
+    workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
+      .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
+
     workers.connexion.ecouterEvenementsCategoriesUsager(categoriesMajHandler)
       .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
 
     return () => { 
       workers.connexion.retirerEvenementsGroupesUsager()
-          .catch(err=>console.warn("Erreur retrait listener groupes ", err))
+        .catch(err=>console.warn("Erreur retrait listener groupes ", err))
       workers.connexion.retirerEvenementsCategoriesUsager()
-          .catch(err=>console.warn("Erreur retrait listener categories ", err))
+        .catch(err=>console.warn("Erreur retrait listener categories ", err))
     }
-  }, [workers, dispatch, etatPret, categoriesMajHandler])
+  }, [workers, dispatch, etatPret, categoriesMajHandler, groupesMajHandler])
 
   let Page = null
   switch(sectionAfficher) {

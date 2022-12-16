@@ -91,7 +91,7 @@ function FormGroupe(props) {
 
 }
 
-function SelectionCategorie(props) {
+export  function SelectionCategorie(props) {
 
     const { groupeId, value, onChange, categories } = props
 

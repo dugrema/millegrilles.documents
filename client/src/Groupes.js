@@ -15,8 +15,8 @@ function AfficherGroupes(props) {
 
     const workers = useWorkers()
     const dispatch = useDispatch()
-    const etatPret = useEtatPret()
     
+    // Categories et groupes charges sous App.js/ApplicationDocuments
     const categories = useSelector(state=>state.categories.liste)
     const groupes = useSelector(state=>state.groupes.liste)
     const groupeId = useSelector(state=>state.groupes.groupeId) || ''
@@ -30,34 +30,34 @@ function AfficherGroupes(props) {
     const nouveauGroupeHandler = useCallback(()=>dispatch(setGroupeId(true)), [dispatch])
     const fermerEditerGroupeHandler = useCallback(()=>dispatch(setGroupeId('')), [dispatch])
 
-    const groupesMajHandler = useCallback(comlinkProxy(message => {
-        dispatch(mergeItems(message.message))
-      }), [dispatch])
+    // const groupesMajHandler = useCallback(comlinkProxy(message => {
+    //     dispatch(mergeItems(message.message))
+    //   }), [dispatch])
     
-    useEffect(()=>{
-        if(!etatPret) return
+    // useEffect(()=>{
+    //     if(!etatPret) return
 
-        workers.connexion.getGroupesUsager()
-            .then(reponse=>{
-                console.debug("Reponse : ", reponse)
-                if(reponse.groupes) {
-                    return dispatch(pushItems({liste: reponse.groupes, clear: true}))
-                } else {
-                    dispatch(clearItems())
-                }
-            })
-            .catch(err=>console.error("Erreur chargement groupes : ", err))
+    //     workers.connexion.getGroupesUsager()
+    //         .then(reponse=>{
+    //             console.debug("Reponse : ", reponse)
+    //             if(reponse.groupes) {
+    //                 return dispatch(pushItems({liste: reponse.groupes, clear: true}))
+    //             } else {
+    //                 dispatch(clearItems())
+    //             }
+    //         })
+    //         .catch(err=>console.error("Erreur chargement groupes : ", err))
 
 
-        workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
-            .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
+    //     workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
+    //         .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
 
-        return () => { 
-            workers.connexion.retirerEvenementsGroupesUsager()
-                .catch(err=>console.warn("Erreur retrait listener groupes ", err))
-        }
+    //     return () => { 
+    //         workers.connexion.retirerEvenementsGroupesUsager()
+    //             .catch(err=>console.warn("Erreur retrait listener groupes ", err))
+    //     }
       
-    }, [workers, dispatch, etatPret, groupesMajHandler])
+    // }, [workers, dispatch, etatPret, groupesMajHandler])
 
     if(groupe) {
         return (
