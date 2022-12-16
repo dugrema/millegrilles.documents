@@ -1,5 +1,6 @@
-import React, {Suspense, useState, useEffect, useMemo, useCallback} from 'react'
-import { Provider as ReduxProvider, useDispatch, useSelector } from 'react-redux'
+import { lazy, Suspense, useState, useMemo, useCallback, useEffect } from 'react'
+import { Provider as ReduxProvider, useDispatch } from 'react-redux'
+import { proxy as comlinkProxy } from 'comlink'
 
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
@@ -9,8 +10,10 @@ import NavDropdown from 'react-bootstrap/NavDropdown'
 import { LayoutMillegrilles, ModalErreur, Menu as MenuMillegrilles, DropDownLanguage, ModalInfo } from '@dugrema/millegrilles.reactjs'
 
 import ErrorBoundary from './ErrorBoundary'
-import useWorkers, {useEtatConnexion, WorkerProvider, useUsager, useFormatteurPret, useInfoConnexion} from './WorkerContext'
+import useWorkers, {useEtatPret, useEtatConnexion, WorkerProvider, useUsager, useFormatteurPret, useInfoConnexion} from './WorkerContext'
 import storeSetup from './redux/store'
+
+import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems } from './redux/categoriesSlice'
 
 import { useTranslation } from 'react-i18next'
 import './i18n'
@@ -28,9 +31,9 @@ import manifest from './manifest.build'
 import './index.scss'
 import './App.css'
 
-const Accueil = React.lazy( () => import('./Accueil') )
-const Categories = React.lazy( () => import('./Categories') )
-const Groupes = React.lazy( () => import('./Groupes') )
+const Accueil = lazy( () => import('./Accueil') )
+const Categories = lazy( () => import('./Categories') )
+const Groupes = lazy( () => import('./Groupes') )
 
 function App() {
   
@@ -79,10 +82,10 @@ function LayoutMain(props) {
 
   const etatAuthentifie = usager && etatFormatteurMessage
 
-  const [userId, estProprietaire] = useMemo(()=>{
+  const estProprietaire = useMemo(()=>{
     if(!usager) return [null, null]
     const extensions = usager.extensions
-    return [extensions.userId, extensions.delegationGlobale === 'proprietaire']
+    return extensions.delegationGlobale === 'proprietaire'
   }, [usager])
 
   // Setup userId dans redux
@@ -124,6 +127,37 @@ function LayoutMain(props) {
 function ApplicationDocuments(props) {
 
   const { sectionAfficher, setSectionAfficher} = props
+
+  const workers = useWorkers()
+  const dispatch = useDispatch()
+  const etatPret = useEtatPret()
+
+  const categoriesMajHandler = useCallback(comlinkProxy(message => {
+    dispatch(categoriesMergeItems(message.message))
+  }), [dispatch])
+
+  useEffect(()=>{
+    if(!etatPret) return
+
+    // S'assurer d'avoir les categories les plus recentes
+    workers.connexion.getCategoriesUsager()
+      .then(reponse=>{
+        if(reponse.categories) {
+          return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
+        }
+      })
+      .catch(err=>console.error("Erreur chargement categories : ", err))
+
+    workers.connexion.ecouterEvenementsCategoriesUsager(categoriesMajHandler)
+      .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
+
+    return () => { 
+      workers.connexion.retirerEvenementsGroupesUsager()
+          .catch(err=>console.warn("Erreur retrait listener groupes ", err))
+      workers.connexion.retirerEvenementsCategoriesUsager()
+          .catch(err=>console.warn("Erreur retrait listener categories ", err))
+    }
+  }, [workers, dispatch, etatPret, categoriesMajHandler])
 
   let Page = null
   switch(sectionAfficher) {

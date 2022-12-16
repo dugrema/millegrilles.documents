@@ -1,64 +1,31 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { proxy as comlinkProxy } from 'comlink'
+import React, { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-import useWorkers, { useEtatPret } from './WorkerContext'
-import { setCategorieId, pushItems, mergeItems, clearItems } from './redux/categoriesSlice'
+import { setCategorieId } from './redux/categoriesSlice'
 
 const EditerCategorie = React.lazy( () => import('./EditerCategorie') )
 
 
 function Categories(props) {
 
-    const workers = useWorkers()
     const dispatch = useDispatch()
-    const etatPret = useEtatPret()
     
-    const categories = useSelector(state=>state.categories.liste) || []
+    // Les categories sont mises a jour dans App.js/ApplicationDocuments
+    const categories = useSelector(state=>state.categories.liste)
     const categorieId = useSelector(state=>state.categories.categorieId) || ''
     
-    // const [categorieId, setCategorieId] = useState('')
-    // const [categories, setCategories] = useState('')
     const categorie = useMemo(()=>{
-        if(!categorieId) return ''
+        if(!categorieId || !categories) return ''
         if(categorieId === true) return {}
         return categories.filter(item=>item.categorie_id === categorieId).pop()
     }, [categories, categorieId])
 
-    const nouvelleCategorieHandler = useCallback(()=>dispatch(setCategorieId(true)), [setCategorieId])
-    const fermerEditerCategorieHandler = useCallback(()=>dispatch(setCategorieId('')), [setCategorieId])
-
-    const categoriesMajHandler = useCallback(comlinkProxy(message => {
-        console.debug("Message recu : %O", message)
-        dispatch(mergeItems(message.message))
-      }), [dispatch])
-    
-    useEffect(()=>{
-        if(!etatPret) return
-
-        workers.connexion.getCategoriesUsager()
-            .then(reponse=>{
-                console.debug("Reponse : ", reponse)
-                if(reponse.categories) {
-                    return dispatch(pushItems({liste: reponse.categories, clear: true}))
-                } else {
-                    dispatch(clearItems())
-                }
-            })
-            .catch(err=>console.error("Erreur chargement categories : ", err))
-
-        workers.connexion.ecouterEvenementsCategoriesUsager(categoriesMajHandler)
-            .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
-        return () => { 
-            workers.connexion.retirerEvenementsCategoriesUsager()
-                .catch(err=>console.warn("Erreur retrait listener categories ", err))
-        }
-      
-    }, [workers, dispatch, etatPret, categoriesMajHandler])
+    const nouvelleCategorieHandler = useCallback(()=>dispatch(setCategorieId(true)), [dispatch])
+    const fermerEditerCategorieHandler = useCallback(()=>dispatch(setCategorieId('')), [dispatch])
 
     if(categorie) {
         return (
@@ -84,9 +51,8 @@ function ListeCategories(props) {
     const dispatch = useDispatch()
 
     const categories = useSelector(state=>state.categories.liste) || []
-    const categorieId = useSelector(state=>state.categorieId) || ''
 
-    const setCategorieHandler = useCallback(event=>dispatch(setCategorieId(event.currentTarget.value)), [])
+    const setCategorieHandler = useCallback(event=>dispatch(setCategorieId(event.currentTarget.value)), [dispatch])
 
     if(!categories || categories.length === 0) return (
         <p>Aucune categorie</p>

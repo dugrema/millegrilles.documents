@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { proxy as comlinkProxy } from 'comlink'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -8,7 +8,6 @@ import Col from 'react-bootstrap/Col'
 
 import useWorkers, { useEtatPret } from './WorkerContext'
 import { setGroupeId, pushItems, mergeItems, clearItems } from './redux/groupesSlice'
-import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems } from './redux/categoriesSlice'
 
 const EditerGroupe = React.lazy( () => import('./EditerGroupe') )
 
@@ -19,24 +18,20 @@ function AfficherGroupes(props) {
     const etatPret = useEtatPret()
     
     const categories = useSelector(state=>state.categories.liste)
-    const groupes = useSelector(state=>state.groupes.liste) || []
+    const groupes = useSelector(state=>state.groupes.liste)
     const groupeId = useSelector(state=>state.groupes.groupeId) || ''
     
     const groupe = useMemo(()=>{
-        if(!groupeId) return ''
+        if(!groupes || !groupeId) return ''
         if(groupeId === true) return {}
         return groupes.filter(item=>item.groupe_id === groupeId).pop()
     }, [groupes, groupeId])
 
-    const nouveauGroupeHandler = useCallback(()=>dispatch(setGroupeId(true)), [setGroupeId])
-    const fermerEditerGroupeHandler = useCallback(()=>dispatch(setGroupeId('')), [setGroupeId])
+    const nouveauGroupeHandler = useCallback(()=>dispatch(setGroupeId(true)), [dispatch])
+    const fermerEditerGroupeHandler = useCallback(()=>dispatch(setGroupeId('')), [dispatch])
 
     const groupesMajHandler = useCallback(comlinkProxy(message => {
         dispatch(mergeItems(message.message))
-      }), [dispatch])
-
-    const categoriesMajHandler = useCallback(comlinkProxy(message => {
-        dispatch(categoriesMergeItems(message.message))
       }), [dispatch])
     
     useEffect(()=>{
@@ -53,26 +48,13 @@ function AfficherGroupes(props) {
             })
             .catch(err=>console.error("Erreur chargement groupes : ", err))
 
-        // S'assurer d'avoir les categories les plus recentes
-        workers.connexion.getCategoriesUsager()
-            .then(reponse=>{
-                if(reponse.categories) {
-                    return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
-                }
-            })
-            .catch(err=>console.error("Erreur chargement categories : ", err))
 
         workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
             .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
 
-        workers.connexion.ecouterEvenementsCategoriesUsager(categoriesMajHandler)
-            .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
-
         return () => { 
             workers.connexion.retirerEvenementsGroupesUsager()
                 .catch(err=>console.warn("Erreur retrait listener groupes ", err))
-            workers.connexion.retirerEvenementsCategoriesUsager()
-                .catch(err=>console.warn("Erreur retrait listener categories ", err))
         }
       
     }, [workers, dispatch, etatPret, groupesMajHandler])
@@ -106,7 +88,7 @@ function ListeGroupes(props) {
 
     const groupes = useSelector(state=>state.groupes.liste) || []
 
-    const setGroupeHandler = useCallback(event=>dispatch(setGroupeId(event.currentTarget.value)), [])
+    const setGroupeHandler = useCallback(event=>dispatch(setGroupeId(event.currentTarget.value)), [dispatch])
 
     if(!groupes || groupes.length === 0) return (
         <p>Aucun groupe</p>

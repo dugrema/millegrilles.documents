@@ -1,15 +1,12 @@
-import React, {useState, useCallback} from 'react'
+import {lazy} from 'react'
 
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-
-const Groupes = React.lazy( () => import('./Groupes') )
+const Documents = lazy( () => import('./Documents') )
 
 function Accueil(props) {
 
     return (
         <div>
-            <p>Choisir option dans le menu</p>
+            <Documents />
         </div>
     )
 }
