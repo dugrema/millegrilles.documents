@@ -19,6 +19,7 @@ const EditerDocument = lazy( () => import('./EditerDocument') )
 function AfficherDocuments(props) {
 
     const groupes = useSelector(state=>state.groupes.liste)
+
     const [groupeId, setGroupeId] = useState('')
 
     const groupeIdChangeHandler = useCallback(event=>setGroupeId(event.currentTarget.value), [setGroupeId])
@@ -26,6 +27,8 @@ function AfficherDocuments(props) {
     return (
         <div>
             <SelectionnerGroupe groupes={groupes} onChange={groupeIdChangeHandler} />
+
+            <p></p>
 
             <AfficherListeDocuments groupeId={groupeId} />
 
@@ -64,7 +67,7 @@ function AfficherListeDocuments(props) {
             <Row>
                 <Col>Liste</Col>
                 <Col>
-                    <Button onClick={documentNewHandler}>+ Nouveau</Button>
+                    <Button variant="secondary" onClick={documentNewHandler}>+ Nouveau</Button>
                 </Col>
             </Row>
 
@@ -75,11 +78,13 @@ function AfficherListeDocuments(props) {
 export function SelectionnerGroupe(props) {
     const { value, onChange, groupes } = props
 
+    const documentId = useSelector(state=>state.documents.documentId)
+
     return (
         <Form.Group as={Row} controlId="groupeId">
             <Form.Label column sm={4} md={2}>Groupe</Form.Label>
             <Col>
-                <Form.Select value={value} onChange={onChange}>
+                <Form.Select value={value} onChange={onChange} disabled={!!documentId}>
                     <SelectionGroupeOptions groupes={groupes} />
                 </Form.Select>        
             </Col>
