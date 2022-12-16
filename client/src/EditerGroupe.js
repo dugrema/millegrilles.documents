@@ -11,7 +11,7 @@ import { pushItems, clearItems } from './redux/categoriesSlice'
 
 function EditerGroupe(props) {
     
-    const { groupe, fermer } = props
+    const { categories, groupe, fermer } = props
 
     if(!groupe) return <p>Aucun groupe selectionne</p>
 
@@ -21,6 +21,7 @@ function EditerGroupe(props) {
                 <Col xs={8} md={10} lg={11}><h2>Groupe</h2></Col>
                 <Col><Button variant="secondary" onClick={fermer}>X</Button></Col>
                 <FormGroupe 
+                    categories={categories}
                     groupe={groupe} 
                     fermer={fermer} />
             </Row>
@@ -34,9 +35,10 @@ export default EditerGroupe
 
 function FormGroupe(props) {
 
-    const { fermer } = props
+    const { categories, fermer } = props
 
     const groupe = props.groupe || {}
+    const groupe_id = groupe.groupe_id
 
     const workers = useWorkers()
 
@@ -71,7 +73,11 @@ function FormGroupe(props) {
                 </Col>
             </Form.Group>
 
-            <SelectionCategorie value={categorieId} onChange={categorieChangeHandler} />
+            <SelectionCategorie 
+                categories={categories}
+                value={categorieId} 
+                onChange={categorieChangeHandler} 
+                groupeId={groupe_id} />
 
             <p></p>
 
@@ -87,15 +93,24 @@ function FormGroupe(props) {
 
 function SelectionCategorie(props) {
 
-    const { value, onChange } = props
+    const { groupeId, value, onChange, categories } = props
+
+    const categorie = useMemo(()=>{
+        if(!categories || !value) return ''
+        return categories.filter(item=>item.categorie_id===value).pop()
+    }, [value, categories])
 
     return (
         <Form.Group as={Row} controlId="categorieId">
             <Form.Label column sm={4} md={2}>Categorie</Form.Label>
             <Col>
-                <Form.Select value={value} onChange={onChange}>
-                    <SelectionCategorieOptions />
-                </Form.Select>        
+                {(groupeId && value)?
+                    <p>{categorie.nom_categorie}</p>
+                :
+                    <Form.Select value={value} onChange={onChange} disabled={!!groupeId}>
+                        <SelectionCategorieOptions categories={categories} />
+                    </Form.Select>        
+                }
             </Col>
         </Form.Group>
     )
@@ -103,26 +118,7 @@ function SelectionCategorie(props) {
 
 function SelectionCategorieOptions(props) {
 
-    const workers = useWorkers()
-    const dispatch = useDispatch()
-    const etatPret = useEtatPret()
-    const categories = useSelector(state=>state.categories.liste)
-
-    useEffect(()=>{
-        if(!etatPret) return
-
-        // S'assurer d'avoir les categories les plus recentes
-        workers.connexion.getCategoriesUsager()
-            .then(reponse=>{
-                if(reponse.categories) {
-                    return dispatch(pushItems({liste: reponse.categories, clear: true}))
-                } else {
-                    dispatch(clearItems())
-                }
-            })
-            .catch(err=>console.error("Erreur chargement categories : ", err))
-
-    }, [etatPret])
+    const { categories } = props
 
     if(!categories || categories.length === 0) {
         return <option>Aucune categorie</option>

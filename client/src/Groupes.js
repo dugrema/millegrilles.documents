@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 
 import useWorkers, { useEtatPret } from './WorkerContext'
 import { setGroupeId, pushItems, mergeItems, clearItems } from './redux/groupesSlice'
+import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems } from './redux/categoriesSlice'
 
 const EditerGroupe = React.lazy( () => import('./EditerGroupe') )
 
@@ -17,6 +18,7 @@ function AfficherGroupes(props) {
     const dispatch = useDispatch()
     const etatPret = useEtatPret()
     
+    const categories = useSelector(state=>state.categories.liste)
     const groupes = useSelector(state=>state.groupes.liste) || []
     const groupeId = useSelector(state=>state.groupes.groupeId) || ''
     
@@ -31,6 +33,10 @@ function AfficherGroupes(props) {
 
     const groupesMajHandler = useCallback(comlinkProxy(message => {
         dispatch(mergeItems(message.message))
+      }), [dispatch])
+
+    const categoriesMajHandler = useCallback(comlinkProxy(message => {
+        dispatch(categoriesMergeItems(message.message))
       }), [dispatch])
     
     useEffect(()=>{
@@ -47,19 +53,36 @@ function AfficherGroupes(props) {
             })
             .catch(err=>console.error("Erreur chargement groupes : ", err))
 
+        // S'assurer d'avoir les categories les plus recentes
+        workers.connexion.getCategoriesUsager()
+            .then(reponse=>{
+                if(reponse.categories) {
+                    return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
+                }
+            })
+            .catch(err=>console.error("Erreur chargement categories : ", err))
+
         workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
             .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
-        
+
+        workers.connexion.ecouterEvenementsCategoriesUsager(categoriesMajHandler)
+            .catch(err=>console.error("Erreur ecouterEvenementsCategoriesUsager ", err))
+
         return () => { 
             workers.connexion.retirerEvenementsGroupesUsager()
                 .catch(err=>console.warn("Erreur retrait listener groupes ", err))
+            workers.connexion.retirerEvenementsCategoriesUsager()
+                .catch(err=>console.warn("Erreur retrait listener categories ", err))
         }
       
     }, [workers, dispatch, etatPret, groupesMajHandler])
 
     if(groupe) {
         return (
-            <EditerGroupe groupe={groupe} fermer={fermerEditerGroupeHandler} />
+            <EditerGroupe 
+                groupe={groupe} 
+                categories={categories}
+                fermer={fermerEditerGroupeHandler} />
         )
     }
 
@@ -67,7 +90,7 @@ function AfficherGroupes(props) {
         <div>
             <h3>Groupes</h3>
 
-            <ListeGroupes />
+            <ListeGroupes categories={categories} />
 
             <Button variant="secondary" onClick={nouveauGroupeHandler}>+ Nouveau</Button>
         </div>
