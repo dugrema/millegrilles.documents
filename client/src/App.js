@@ -14,7 +14,7 @@ import useWorkers, {useEtatPret, useEtatConnexion, WorkerProvider, useUsager, us
 import storeSetup from './redux/store'
 
 import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems, thunks as thunksCategories } from './redux/categoriesSlice'
-import { pushItems as groupesPushItems, mergeItems as groupesMergeItems } from './redux/groupesSlice'
+import { pushItems as groupesPushItems, mergeItems as groupesMergeItems, thunks as thunksGroupes } from './redux/groupesSlice'
 
 import { useTranslation } from 'react-i18next'
 import './i18n'
@@ -155,14 +155,16 @@ function ApplicationDocuments(props) {
     dispatch(thunksCategories.rafraichirCategories(workers))
       .catch(err=>console.error("Erreur chargement categories"))
 
-    workers.connexion.getGroupesUsager()
-      .then(reponse=>{
-        if(reponse.groupes) {
-          console.debug("Recu groupes : ", reponse.groupes)
-          return dispatch(groupesPushItems({liste: reponse.groupes, clear: true}))
-        }
-      })
-      .catch(err=>console.error("Erreur chargement groupes : ", err))
+    // workers.connexion.getGroupesUsager()
+    //   .then(reponse=>{
+    //     if(reponse.groupes) {
+    //       console.debug("Recu groupes : ", reponse.groupes)
+    //       return dispatch(groupesPushItems({liste: reponse.groupes, clear: true}))
+    //     }
+    //   })
+    //   .catch(err=>console.error("Erreur chargement groupes : ", err))
+    dispatch(thunksGroupes.rafraichirGroupes(workers))
+      .catch(err=>console.error("Erreur chargement groupes"))
 
     workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
       .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))

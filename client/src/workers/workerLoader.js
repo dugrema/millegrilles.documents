@@ -2,6 +2,7 @@ import { wrap, releaseProxy } from 'comlink'
 import { usagerDao } from '@dugrema/millegrilles.reactjs'
 
 import * as categoriesDao from '../redux/categoriesIdbDao'
+import * as groupesDao from '../redux/groupesIdbDao'
 
 // Exemple de loader pour web workers
 export function setupWorkers() {
@@ -20,6 +21,7 @@ export function setupWorkers() {
   // Pseudo-worker
   workers.usagerDao = usagerDao                   // IDB usager
   workers.categoriesDao = categoriesDao
+  workers.groupesDao = groupesDao
   
   const location = new URL(window.location)
   location.pathname = '/fiche.json'

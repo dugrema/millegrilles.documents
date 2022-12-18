@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, isAnyOf, createListenerMiddleware } from '@reduxjs/toolkit'
 
 const SLICE_NAME = 'groupes'
 
@@ -118,6 +118,97 @@ export const {
 } = groupesSlice.actions
 
 export default groupesSlice.reducer
+
+function creerThunks(actions) {
+
+    // Action creators are generated for each case reducer function
+    const { 
+        setGroupeId, pushItems, mergeItems, clearItems, setSortKeys,
+    } = actions
+
+    function rafraichirGroupes(workers) {
+        return (dispatch, getState) => traiterRafraichirGroupes(workers, dispatch, getState)
+    }
+
+    async function traiterRafraichirGroupes(workers, dispatch, getState) {
+        console.debug('traiterRafraichirGroupes')
+        const { groupesDao } = workers
+    
+        const state = getState().groupes
+        const { userId } = state
+    
+        // Nettoyer la liste
+        dispatch(clearItems())
+    
+        const groupes = await groupesDao.getParUserId(userId)
+        console.debug("Chargement groupes locales : ", groupes)
+
+        // Pre-charger le contenu de la liste de fichiers avec ce qu'on a deja dans idb
+        if(groupes) {
+            dispatch(pushItems({liste: groupes}))
+        }
+    
+        const reponseGroupes = await workers.connexion.getGroupesUsager()
+        console.debug("Chargement groupes serveur : ", reponseGroupes)
+        const groupesRecus = reponseGroupes.groupes
+        if(groupesRecus) {
+            groupesDao.syncGroupes(groupesRecus)
+                .catch(err=>console.error("Erreur sauvegarder groupes dans IDB : ", err))
+            dispatch(mergeItems(groupesRecus))
+        }        
+    }    
+
+    // Async actions
+    const thunks = { 
+        rafraichirGroupes,
+    }
+
+    return thunks
+}
+
+export const thunks = creerThunks(groupesSlice.actions)
+
+// Middleware
+export function middlewareSetup(workers) {
+    const middleware = createListenerMiddleware()
+    
+    middleware.startListening({
+        matcher: isAnyOf(pushItems, mergeItems),
+        effect: (action, listenerApi) => middlewareListener(workers, action, listenerApi)
+    }) 
+    
+    return middleware
+}
+
+async function middlewareListener(workers, action, listenerApi) {
+    console.debug("middlewareListener running effect, action : %O", action)
+    // console.debug("Arret upload info : %O", arretUpload)
+
+    await listenerApi.unsubscribe()
+    try {
+        // Reset liste de fichiers completes utilises pour calculer pourcentage upload
+        //listenerApi.dispatch(clearCycleDownload())
+
+        // const task = listenerApi.fork( forkApi => tacheDownload(workers, listenerApi, forkApi) )
+        // const stopAction = listenerApi.condition(arretDownload.match)
+        // await Promise.race([task.result, stopAction])
+
+        // console.debug("downloaderMiddlewareListener Task %O\nstopAction %O", task, stopAction)
+        // task.result.catch(err=>console.error("Erreur task : %O", err))
+        // stopAction
+        //     .then(()=>task.cancel())
+        //     .catch(()=>{
+        //         // Aucun impact
+        //     })
+
+        // const resultat = await task.result  // Attendre fin de la tache en cas d'annulation
+        console.debug("middlewareListener Sequence terminee")
+    } finally {
+        await listenerApi.subscribe()
+    }
+}
+
+
 
 function genererTriListe(sortKeys) {
     

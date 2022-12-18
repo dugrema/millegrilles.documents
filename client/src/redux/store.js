@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import categoriesSlice from './categoriesSlice'
-import groupesSlice from './groupesSlice'
+import groupesSlice, { middlewareSetup as groupeMiddlewareSetup} from './groupesSlice'
 import documentsSlice from './documentsSlice'
 
 function storeSetup(workers) {
+
+  const groupesMiddleware = groupeMiddlewareSetup()
 
   // Configurer le store redux
   const store = configureStore({
@@ -13,12 +15,11 @@ function storeSetup(workers) {
       groupes: groupesSlice,
       documents: documentsSlice,
     },
-
     middleware: (getDefaultMiddleware) => {
       
       // Prepend, evite le serializability check
       return getDefaultMiddleware()
-        // .prepend(appareilsMiddleware.middleware)
+        .prepend(groupesMiddleware.middleware)
 
     },
   })
