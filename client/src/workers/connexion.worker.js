@@ -41,10 +41,16 @@ function sauvegarderCategorieUsager(categorie) {
   )
 }
 
-function sauvegarderGroupeUsager(groupe) {
+function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
+
+  const commandeCombinee = {...commande}
+  if(commandeMaitrecles) {
+    commandeCombinee['_commandeMaitrecles'] = commandeMaitrecles
+  }
+
   return ConnexionClient.emitBlocking(
     'sauvegarderGroupeUsager', 
-    groupe, 
+    commandeCombinee,
     {
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'sauvegarderGroupeUsager', 

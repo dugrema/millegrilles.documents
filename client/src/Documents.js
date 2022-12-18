@@ -101,8 +101,9 @@ function SelectionGroupeOptions(props) {
     }
 
     let options = groupes.map(item=>{
+        const label = item.nom_groupe || item.groupe_id
         return (
-            <option key={item.groupe_id} value={item.groupe_id}>{item.nom_groupe}</option>
+            <option key={item.groupe_id} value={item.groupe_id}>{label}</option>
         )
     })
 

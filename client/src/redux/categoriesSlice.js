@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, isAnyOf, createListenerMiddleware } from '@reduxjs/toolkit'
 
 const SLICE_NAME = 'categories'
 
@@ -120,6 +120,55 @@ export const {
 } = categoriesSlice.actions
 
 export default categoriesSlice.reducer
+
+function creerThunks(actions) {
+
+    // Action creators are generated for each case reducer function
+    const { 
+        setCategorieId, pushItems, mergeItems, clearItems,
+    } = actions
+
+    function rafraichirCategories(workers) {
+        return (dispatch, getState) => traiterRafraichirCategories(workers, dispatch, getState)
+    }
+
+    async function traiterRafraichirCategories(workers, dispatch, getState) {
+        console.debug('traiterRafraichirCategories')
+        const { categoriesDao } = workers
+    
+        const state = getState().categories
+        const { userId } = state
+    
+        // Nettoyer la liste
+        dispatch(clearItems())
+    
+        const categories = await categoriesDao.getParUserId(userId)
+        console.debug("Chargement categories locales : ", categories)
+
+        // Pre-charger le contenu de la liste de fichiers avec ce qu'on a deja dans idb
+        if(categories) {
+            dispatch(pushItems({liste: categories}))
+        }
+    
+        const reponseCategories = await workers.connexion.getCategoriesUsager()
+        console.debug("Chargement categories serveur : ", reponseCategories)
+        const categoriesRecues = reponseCategories.categories
+        if(categoriesRecues) {
+            categoriesDao.syncCategories(categoriesRecues)
+                .catch(err=>console.error("Erreur sauvegarder categories dans IDB : ", err))
+            dispatch(mergeItems(categoriesRecues))
+        }        
+    }    
+
+    // Async actions
+    const thunks = { 
+        rafraichirCategories,
+    }
+
+    return thunks
+}
+
+export const thunks = creerThunks(categoriesSlice.actions)
 
 function genererTriListe(sortKeys) {
     

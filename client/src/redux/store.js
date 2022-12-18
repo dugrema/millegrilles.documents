@@ -16,8 +16,6 @@ function storeSetup(workers) {
 
     middleware: (getDefaultMiddleware) => {
       
-      // const { appareilsMiddleware } = appareilsMiddlewareSetup(workers)
-
       // Prepend, evite le serializability check
       return getDefaultMiddleware()
         // .prepend(appareilsMiddleware.middleware)

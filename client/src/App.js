@@ -13,7 +13,7 @@ import ErrorBoundary from './ErrorBoundary'
 import useWorkers, {useEtatPret, useEtatConnexion, WorkerProvider, useUsager, useFormatteurPret, useInfoConnexion} from './WorkerContext'
 import storeSetup from './redux/store'
 
-import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems } from './redux/categoriesSlice'
+import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems, thunks as thunksCategories } from './redux/categoriesSlice'
 import { pushItems as groupesPushItems, mergeItems as groupesMergeItems } from './redux/groupesSlice'
 
 import { useTranslation } from 'react-i18next'
@@ -145,17 +145,20 @@ function ApplicationDocuments(props) {
     if(!etatPret) return
 
     // S'assurer d'avoir les categories les plus recentes
-    workers.connexion.getCategoriesUsager()
-      .then(reponse=>{
-        if(reponse.categories) {
-          return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
-        }
-      })
-      .catch(err=>console.error("Erreur chargement categories : ", err))
+    // workers.connexion.getCategoriesUsager()
+    //   .then(reponse=>{
+    //     if(reponse.categories) {
+    //       return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
+    //     }
+    //   })
+    //   .catch(err=>console.error("Erreur chargement categories : ", err))
+    dispatch(thunksCategories.rafraichirCategories(workers))
+      .catch(err=>console.error("Erreur chargement categories"))
 
     workers.connexion.getGroupesUsager()
       .then(reponse=>{
         if(reponse.groupes) {
+          console.debug("Recu groupes : ", reponse.groupes)
           return dispatch(groupesPushItems({liste: reponse.groupes, clear: true}))
         }
       })

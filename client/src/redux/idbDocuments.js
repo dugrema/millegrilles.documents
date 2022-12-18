@@ -2,9 +2,11 @@ import { openDB } from 'idb'
 
 const DB_NAME = 'documents',
       STORE_DOCUMENTS = 'documents',
+      STORE_GROUPES = 'groupes',
+      STORE_CATEGORIES = 'categories',
       VERSION_COURANTE = 1
 
-export { DB_NAME, STORE_DOCUMENTS }
+export { DB_NAME, STORE_DOCUMENTS, STORE_GROUPES, STORE_CATEGORIES }
 
 export function ouvrirDB(opts) {
     opts = opts || {}
@@ -24,16 +26,19 @@ export function ouvrirDB(opts) {
 }
 
 function createObjectStores(db, oldVersion) {
-    let documentStore = null
+    let documentStore = null, groupeStore = null, categorieStore = null
     try {
         /*eslint no-fallthrough: "off"*/
         switch(oldVersion) {
             case 0:
-                console.debug("Creation docstore")
+                categorieStore = db.createObjectStore(STORE_CATEGORIES, {keyPath: 'categorie_id'})
+                categorieStore.createIndex('userid', 'user_id', {unique: false, multiEntry: false})
+
+                groupeStore = db.createObjectStore(STORE_GROUPES, {keyPath: 'groupe_id'})
+                groupeStore.createIndex('userid', 'user_id', {unique: false, multiEntry: false})
+
                 documentStore = db.createObjectStore(STORE_DOCUMENTS, {keyPath: 'document_id'})
-                console.debug("Creation index")
                 documentStore.createIndex('useridGroupe', ['user_id', 'groupe_id'], {unique: false, multiEntry: false})
-                console.debug("OK")
             case 1: // Plus recent, rien a faire
                 break
             default:

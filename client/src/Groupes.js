@@ -95,11 +95,12 @@ function ListeGroupes(props) {
     )
 
     return groupes.map(item=>{
+        const label = item.nom_groupe || item.groupe_id
         return (
             <Row key={item.groupe_id}>
                 <Col>
                     <Button variant="link" onClick={setGroupeHandler} value={item.groupe_id}>
-                        {item.nom_groupe}
+                        {label}
                     </Button>
                 </Col>
             </Row>
