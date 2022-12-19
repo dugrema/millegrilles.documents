@@ -9,7 +9,7 @@ const initialState = {
 
     userId: null,
     groupeId: null,                     // Groupe de documents actif (pour navigation)
-    documentId: null,                   // Identificateur actif
+    docId: null,                   // Identificateur actif
 }
 
 // Actions
@@ -111,8 +111,8 @@ function mergeItemsInnerAction(state, action) {
     state.liste.sort(genererTriListe(state.sortKeys))
 }
 
-function setDocumentIdAction(state, action) {
-    state.documentId = action.payload
+function setDocIdAction(state, action) {
+    state.docId = action.payload
 }
 
 const documentsSlice = createSlice({
@@ -121,7 +121,7 @@ const documentsSlice = createSlice({
     reducers: {
         setUserId: setUserIdAction,
         setGroupeId: setGroupeIdAction,
-        setDocumentId: setDocumentIdAction,
+        setDocId: setDocIdAction,
         pushItems: pushItemsAction, 
         mergeItems: mergeItemsAction,
         mergeItemsInner: mergeItemsInnerAction,
@@ -131,7 +131,7 @@ const documentsSlice = createSlice({
 })
 
 export const { 
-    setUserId, setGroupeId, setDocumentId, pushItems, mergeItems, clearItems, setSortKeys,
+    setUserId, setGroupeId, setDocId, pushItems, mergeItems, clearItems, setSortKeys,
 } = documentsSlice.actions
 
 export default documentsSlice.reducer
@@ -140,7 +140,7 @@ function creerThunks(actions) {
 
     // Action creators are generated for each case reducer function
     const { 
-        setGroupeId, setDocumentId, pushItems, mergeItems, clearItems, setSortKeys,
+        setGroupeId, setDocId, pushItems, mergeItems, clearItems, setSortKeys,
         mergeItemsInner,
     } = actions
 

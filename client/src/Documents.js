@@ -1,4 +1,4 @@
-import { lazy, useState, useCallback, useEffect, useMemo } from 'react'
+import { lazy, useCallback, useEffect, useMemo } from 'react'
 import { proxy as comlinkProxy } from 'comlink'
 
 import useWorkers, { useUsager, useEtatPret } from './WorkerContext'
@@ -10,7 +10,7 @@ import Col from 'react-bootstrap/Col'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { setUserId, setGroupeId, setDocumentId, mergeItems as documentsMergeItems, thunks as thunksDocuments } from './redux/documentsSlice'
+import { setUserId, setGroupeId, setDocId, thunks as thunksDocuments } from './redux/documentsSlice'
 
 const AfficherDocument = lazy( () => import('./AfficherDocument') )
 const EditerDocument = lazy( () => import('./EditerDocument') )
@@ -33,7 +33,7 @@ function AfficherDocuments(props) {
     
         const userId = usager.extensions.userId
         dispatch(setUserId(userId))
-    }, [dispatch, usager])
+    }, [dispatch, usager, etatPret])
 
     return (
         <div>
@@ -55,7 +55,7 @@ function AfficherListeDocuments(props) {
     const workers = useWorkers()
     const etatPret = useEtatPret()
     const groupeId = useSelector(state=>state.documents.groupeId)
-    const documentId = useSelector(state=>state.documents.documentId)
+    const docId = useSelector(state=>state.documents.docId)
     const groupes = useSelector(state=>state.groupes.liste)
     const categories = useSelector(state=>state.categories.liste)
     const listeDocuments = useSelector(state=>state.documents.liste) || []
@@ -83,9 +83,8 @@ function AfficherListeDocuments(props) {
             .catch(err=>console.error("Erreur reception maj document ", err))
       }), [dispatch])
     
-    const documentNewHandler = useCallback(()=>{
-        dispatch(setDocumentId(true))
-    }, [dispatch])
+    const documentNewHandler = useCallback(()=>dispatch(setDocId(true)), [dispatch])
+    const docIdChangeHandler = useCallback(event => dispatch(setDocId(event.currentTarget.value)), [dispatch])
 
     useEffect(()=>{
         if(!etatPret) return
@@ -107,13 +106,13 @@ function AfficherListeDocuments(props) {
             .catch(err=>console.error("Erreur chargement documents ", err))
     }, [workers, dispatch, groupe, categorie])
 
-    if(documentId === true) {
+    if(docId === true) {
         return (
             <EditerDocument groupeId={groupeId} />
         )
-    } else if(documentId) {
+    } else if(docId) {
         return (
-            <AfficherDocument />            
+            <AfficherDocument groupeId={groupeId} />
         )
     }
 
@@ -130,7 +129,11 @@ function AfficherListeDocuments(props) {
             </Row>
 
             {listeDocuments.map(item=>(
-                <DocumentRow key={item.doc_id} value={item} groupe={groupe} categorie={categorie} />
+                <DocumentRow key={item.doc_id} 
+                    value={item} 
+                    groupe={groupe} 
+                    categorie={categorie} 
+                    setDocId={docIdChangeHandler} />
             ))}
 
         </div>
@@ -177,7 +180,7 @@ function SelectionGroupeOptions(props) {
 
 function DocumentRow(props) {
 
-    const { value, categorie } = props
+    const { value, categorie, setDocId } = props
 
     const champLabel = categorie.champs[0]
     const idChampLabel = champLabel.code_interne
@@ -185,7 +188,11 @@ function DocumentRow(props) {
 
     return (
         <Row>
-            <Col>{label}</Col>
+            <Col>
+                <Button variant="link" onClick={setDocId} value={value.doc_id}>
+                    {label}
+                </Button>
+            </Col>
         </Row>
     )
 }

@@ -8,7 +8,7 @@ import Col from 'react-bootstrap/Col'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { setDocumentId } from './redux/documentsSlice'
+import { setDocId } from './redux/documentsSlice'
 
 function EditerDocument(props) {
 
@@ -16,10 +16,11 @@ function EditerDocument(props) {
 
     const workers = useWorkers()
     const dispatch = useDispatch()
+    const docId = useSelector(state=>state.documents.docId)
     const groupes = useSelector(state=>state.groupes.liste)
     const categories = useSelector(state=>state.categories.liste)
+    const listeDocuments = useSelector(state=>state.documents.liste)
 
-    const [docId, setDocId] = useState('')
     const [contenuDocument, setContenuDocument] = useState('')
 
     const onContenuChangeHandler = useCallback(event=>{
@@ -37,7 +38,7 @@ function EditerDocument(props) {
         return [groupe, categorie]
     }, [categories, groupes, groupeId])
 
-    const fermerHandler = useCallback(()=>dispatch(setDocumentId(null)))
+    const fermerHandler = useCallback(()=>dispatch(setDocId(null)))
 
     const sauvegarderHandler = useCallback(event=>{
         console.debug("sauvegarder : %O dans groupe %O, categorie: %O", contenuDocument, groupe, categorie)
@@ -46,7 +47,7 @@ function EditerDocument(props) {
             groupe_id: groupe.groupe_id,
             categorie_version: categorie.version,
         }
-        if(docId) commande.doc_id = docId
+        if(docId && docId !== true) commande.doc_id = docId
         
         workers.clesDao.getCles(ref_hachage_bytes)
             .then( async cle => {
@@ -66,17 +67,26 @@ function EditerDocument(props) {
     // Copier contenu du document sur init
     useEffect(()=>{
         // Todo : detecter si nouveau doc ou existant
-
-        // Nouveau document
         const contenuDocument = {}
+        if(typeof(docId) === 'string') {
+            // Chargement document
+            const docInfo = listeDocuments.filter(item=>item.doc_id === docId).pop()
+            if(docInfo) {
+                Object.assign(contenuDocument, docInfo)
+            }
+        }
+
+        // Initialiser champs manquants
         for(const champ of categorie.champs) {
             const code_interne_champ = champ.code_interne
-            contenuDocument[code_interne_champ] = null  // Initialiser champs
+            if(contenuDocument[code_interne_champ] === undefined) {
+                contenuDocument[code_interne_champ] = null  // Initialiser champ
+            }
         }
 
         setContenuDocument(contenuDocument)
 
-    }, [categorie, setContenuDocument])
+    }, [listeDocuments, categorie, docId, setContenuDocument])
 
     if(!groupe) return ''
 
