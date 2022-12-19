@@ -37,6 +37,8 @@ function EditerDocument(props) {
         return [groupe, categorie]
     }, [categories, groupes, groupeId])
 
+    const fermerHandler = useCallback(()=>dispatch(setDocumentId(null)))
+
     const sauvegarderHandler = useCallback(event=>{
         console.debug("sauvegarder : %O dans groupe %O, categorie: %O", contenuDocument, groupe, categorie)
         const ref_hachage_bytes = groupe.ref_hachage_bytes
@@ -56,11 +58,10 @@ function EditerDocument(props) {
 
                 const reponse = await workers.connexion.sauvegarderDocument(commande)
                 console.debug("Reponse sauvegarder document ", reponse)
+                fermerHandler()
             })
             .catch(err=>console.error("Erreur sauvegarde document ", err))
-    }, [workers, categorie, groupe, docId, contenuDocument])
-
-    const fermerHandler = useCallback(()=>dispatch(setDocumentId(null)))
+    }, [workers, categorie, groupe, docId, contenuDocument, fermerHandler])
 
     // Copier contenu du document sur init
     useEffect(()=>{

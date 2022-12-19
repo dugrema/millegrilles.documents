@@ -68,7 +68,7 @@ function mergeItemsInnerAction(state, action) {
     }
 
     for (const payloadItem of payload) {
-        let { document_id } = payloadItem
+        let { doc_id } = payloadItem
 
         // Ajout flag _mergeVersion pour rafraichissement ecran
         const data = {...(payloadItem || {})}
@@ -84,7 +84,7 @@ function mergeItemsInnerAction(state, action) {
         }
 
         // Trouver un fichier correspondant
-        let dataCourant = liste.filter(item=>item.document_id === document_id).pop()
+        let dataCourant = liste.filter(item=>item.doc_id === doc_id).pop()
 
         // Copier donnees vers state
         if(dataCourant) {
@@ -99,7 +99,7 @@ function mergeItemsInnerAction(state, action) {
                 retirer = true
             }
 
-            if(retirer) state.liste = liste.filter(item=>item.document_id !== document_id)
+            if(retirer) state.liste = liste.filter(item=>item.doc_id !== doc_id)
 
         } else if(peutAppend === true) {
             liste.push(data)

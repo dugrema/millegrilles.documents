@@ -72,7 +72,15 @@ function AfficherListeDocuments(props) {
     }, [groupe, categories])
 
     const documentsMajHandler = useCallback(comlinkProxy(message => {
-        dispatch(documentsMergeItems(message.message))
+        console.debug("Message document recu : ", message)
+        // dispatch(documentsMergeItems(message.message))
+        const docCleanup = {...message.message}
+        delete docCleanup['_signature']
+        delete docCleanup['_certificat']
+        delete docCleanup['en-tete']
+        delete docCleanup.certificat
+        dispatch(thunksDocuments.recevoirDocument(workers, docCleanup))
+            .catch(err=>console.error("Erreur reception maj document ", err))
       }), [dispatch])
     
     const documentNewHandler = useCallback(()=>{
@@ -109,7 +117,7 @@ function AfficherListeDocuments(props) {
         )
     }
 
-    if(!groupeId) return ''
+    if(!groupe || !categorie) return ''
     return (
         <div>
             <p></p>
@@ -171,7 +179,9 @@ function DocumentRow(props) {
 
     const { value, categorie } = props
 
-    const label = value.doc_id
+    const champLabel = categorie.champs[0]
+    const idChampLabel = champLabel.code_interne
+    const label = value[idChampLabel] || value.doc_id
 
     return (
         <Row>

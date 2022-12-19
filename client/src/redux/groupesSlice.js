@@ -202,31 +202,33 @@ function creerThunks(actions) {
 
         // Detecter les cles requises
         const liste_hachage_bytes = groupesChiffres.map(item=>item.ref_hachage_bytes)
-        try {
-            const cles = await clesDao.getCles(liste_hachage_bytes)
-            console.debug("Cles recues : ", cles)
-            for await (const groupe of groupesChiffres) {
-                let cleMetadata = cles[groupe.ref_hachage_bytes]
-                if(cleMetadata) {
-                    try {
-                        const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(groupe, cleMetadata)
-                        console.debug("Meta dechiffree : ", metaDechiffree)
-                        const groupeMaj = {
-                            ...metaDechiffree, 
-                            groupe_id: groupe.groupe_id, user_id: userId,
+        if(liste_hachage_bytes && liste_hachage_bytes.length > 0) {
+            try {
+                const cles = await clesDao.getCles(liste_hachage_bytes)
+                console.debug("Cles recues : ", cles)
+                for await (const groupe of groupesChiffres) {
+                    let cleMetadata = cles[groupe.ref_hachage_bytes]
+                    if(cleMetadata) {
+                        try {
+                            const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(groupe, cleMetadata)
+                            console.debug("Meta dechiffree : ", metaDechiffree)
+                            const groupeMaj = {
+                                ...metaDechiffree, 
+                                groupe_id: groupe.groupe_id, user_id: userId,
+                            }
+                            await groupesDao.updateGroupe(groupeMaj, {dechiffre: true})
+                            dispatch(mergeItemsInner(groupeMaj))
+                        } catch(err) {
+                            console.warn("Erreur dechiffrage groupe %s : %O", groupe.nom_groupe, err)
                         }
-                        await groupesDao.updateGroupe(groupeMaj)
-                        dispatch(mergeItemsInner(groupeMaj))
-                    } catch(err) {
-                        console.warn("Erreur dechiffrage groupe %s : %O", groupe.nom_groupe, err)
+                    } else {
+                        console.warn("Cle manquante pour groupe %s", groupe.groupe_nom)
                     }
-                } else {
-                    console.warn("Cle manquante pour groupe %s", groupe.groupe_nom)
                 }
+        
+            } catch(err) {
+                console.error("Erreur chargement cles %O : %O", liste_hachage_bytes, err)
             }
-    
-        } catch(err) {
-            console.error("Erreur chargement cles %O : %O", liste_hachage_bytes, err)
         }
 
     }

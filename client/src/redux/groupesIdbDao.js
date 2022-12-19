@@ -33,6 +33,8 @@ export async function syncGroupes(groupes, opts) {
 export async function updateGroupe(groupe, opts) {
     opts = opts || {}
 
+    const dechiffre = opts.dechiffre
+
     const { groupe_id, user_id } = groupe
     if(!groupe_id) throw new Error('updateCategorie groupe_id doit etre fourni')
     if(!user_id) throw new Error('updateCategorie user_id doit etre fourni')
@@ -43,6 +45,11 @@ export async function updateGroupe(groupe, opts) {
     const store = db.transaction(STORE_GROUPES, 'readwrite').store
     const groupeDoc = (await store.get(groupe_id)) || {}
     Object.assign(groupeDoc, groupe)
+
+    if(dechiffre === true) {
+        // Cleanup data chiffre
+        delete groupeDoc.data_chiffre
+    }
     
     // Changer flags
     flags.forEach(flag=>{
