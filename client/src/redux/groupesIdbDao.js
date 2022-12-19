@@ -4,7 +4,9 @@ export function init() {
     return ouvrirDB()
 }
 
-export async function syncGroupes(groupes) {
+export async function syncGroupes(groupes, opts) {
+    opts = opts || {}
+    console.debug("syncgroupes opts : ", opts)
     if(!groupes) return []
 
     const db = await ouvrirDB()
@@ -16,11 +18,13 @@ export async function syncGroupes(groupes) {
         if(groupeDoc) {
             if(groupeDoc.header !== infoGroupe.header) {
                 console.debug("update groupe : ", infoGroupe)
-                await store.update({...infoGroupe, dechiffre: false})
+                await store.update({...groupeDoc, ...infoGroupe})
             }
         } else {
             console.debug("put groupe : ", infoGroupe)
-            await store.put(infoGroupe)
+            const user_id = infoGroupe.user_id || opts.userId
+            if(!user_id) throw new Error("UserId manquant")
+            await store.put({...infoGroupe, user_id})
         }
     }
 }
@@ -62,13 +66,28 @@ export async function getParUserId(userId) {
     const store = db.transaction(STORE_GROUPES, 'readonly').store
     const index = store.index('userid')
     let curseur = await index.openCursor(userId)
-    const categories = []
+    const groupes = []
     while(curseur) {
         const value = curseur.value
-        categories.push(value)
+        groupes.push(value)
         curseur = await curseur.continue()
     }
-    return categories
+    return groupes
+}
+
+export async function getGroupesChiffres(userId) {
+    console.debug("Get groupes chiffres userId ", userId)
+    const db = await ouvrirDB()
+    const store = db.transaction(STORE_GROUPES, 'readonly').store
+    const index = store.index('userid')
+    let curseur = await index.openCursor(userId)
+    const groupes = []
+    while(curseur) {
+        const value = curseur.value
+        if(value.data_chiffre) groupes.push(value)
+        curseur = await curseur.continue()
+    }
+    return groupes
 }
 
 // Supprime le contenu de idb

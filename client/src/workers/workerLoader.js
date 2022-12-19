@@ -3,6 +3,7 @@ import { usagerDao } from '@dugrema/millegrilles.reactjs'
 
 import * as categoriesDao from '../redux/categoriesIdbDao'
 import * as groupesDao from '../redux/groupesIdbDao'
+import clesDao from '../redux/clesDao'
 
 // Exemple de loader pour web workers
 export function setupWorkers() {
@@ -20,6 +21,7 @@ export function setupWorkers() {
   
   // Pseudo-worker
   workers.usagerDao = usagerDao                   // IDB usager
+  workers.clesDao = clesDao(workers)              // Cles asymetriques
   workers.categoriesDao = categoriesDao
   workers.groupesDao = groupesDao
   

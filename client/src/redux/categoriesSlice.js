@@ -7,10 +7,15 @@ const initialState = {
     sortKeys: {key: 'nom', ordre: 1},   // Ordre de tri
     mergeVersion: 0,                    // Utilise pour flagger les changements
 
+    userId: null,
     categorieId: null,                  // Identificateur actif
 }
 
 // Actions
+function setUserIdAction(state, action) {
+    state.userId = action.payload
+}
+
 function setSortKeysAction(state, action) {
     const sortKeys = action.payload
     state.sortKeys = sortKeys
@@ -107,6 +112,7 @@ const categoriesSlice = createSlice({
     name: SLICE_NAME,
     initialState,
     reducers: {
+        setUserId: setUserIdAction,
         setCategorieId: setCategorieIdAction,
         pushItems: pushItemsAction, 
         mergeItems: mergeItemsAction,
@@ -116,7 +122,7 @@ const categoriesSlice = createSlice({
 })
 
 export const { 
-    setCategorieId, pushItems, mergeItems, clearItems, setSortKeys,
+    setUserId, setCategorieId, pushItems, mergeItems, clearItems, setSortKeys,
 } = categoriesSlice.actions
 
 export default categoriesSlice.reducer

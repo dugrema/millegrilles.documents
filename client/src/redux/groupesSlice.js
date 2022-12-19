@@ -7,10 +7,15 @@ const initialState = {
     sortKeys: {key: 'nom', ordre: 1},   // Ordre de tri
     mergeVersion: 0,                    // Utilise pour flagger les changements
 
+    userId: null,
     groupeId: null,                     // Identificateur actif
 }
 
 // Actions
+function setUserIdAction(state, action) {
+    state.userId = action.payload
+}
+
 function setSortKeysAction(state, action) {
     const sortKeys = action.payload
     state.sortKeys = sortKeys
@@ -105,6 +110,7 @@ const groupesSlice = createSlice({
     name: SLICE_NAME,
     initialState,
     reducers: {
+        setUserId: setUserIdAction,
         setGroupeId: setGroupeIdAction,
         pushItems: pushItemsAction, 
         mergeItems: mergeItemsAction,
@@ -114,7 +120,7 @@ const groupesSlice = createSlice({
 })
 
 export const { 
-    setGroupeId, pushItems, mergeItems, clearItems, setSortKeys,
+    setUserId, setGroupeId, pushItems, mergeItems, clearItems, setSortKeys,
 } = groupesSlice.actions
 
 export default groupesSlice.reducer
@@ -152,15 +158,58 @@ function creerThunks(actions) {
         console.debug("Chargement groupes serveur : ", reponseGroupes)
         const groupesRecus = reponseGroupes.groupes
         if(groupesRecus) {
-            groupesDao.syncGroupes(groupesRecus)
+            groupesDao.syncGroupes(groupesRecus, {userId})
                 .catch(err=>console.error("Erreur sauvegarder groupes dans IDB : ", err))
             dispatch(mergeItems(groupesRecus))
         }        
     }    
 
+    function dechiffrerGroupes(workers) {
+        return (dispatch, getState) => traiterDechiffrerGroupes(workers, dispatch, getState)
+    }
+    
+    async function traiterDechiffrerGroupes(workers, dispatch, getState) {
+    
+        const state = getState().groupes
+        const { userId } = state
+
+        const { clesDao, groupesDao } = workers
+        const groupesChiffres = await groupesDao.getGroupesChiffres(userId)
+        console.debug("Groupes chiffres : ", groupesChiffres)
+
+        // Detecter les cles requises
+        const liste_hachage_bytes = groupesChiffres.map(item=>item.ref_hachage_bytes)
+        try {
+            const cles = await clesDao.getCles(liste_hachage_bytes)
+            console.debug("Cles recues : ", cles)
+            for await (const groupe of groupesChiffres) {
+                // const metaDechiffree = await chiffrage.chiffrage.dechiffrerChampsChiffres(metadata, cleMetadata)
+            }
+    
+        } catch(err) {
+            console.error("Erreur chargement cles %O : %O", liste_hachage_bytes, err)
+        }
+
+        // // console.debug('traiterDechiffrerFichiers Cles a extraire : %O de fichiers %O', clesHachage_bytes, fichiersChiffres)
+        // if(fichiersChiffres.length > 0) dispatch(pushFichiersChiffres(fichiersChiffres))
+    
+        // const tuuidsChiffres = fichiersChiffres.map(item=>item.tuuid)
+        // for (const fichier of fichiers) {
+        //     // console.debug("traiterDechiffrerFichiers Dechiffrer fichier ", fichier)
+        //     const dechiffre = ! tuuidsChiffres.includes(fichier.tuuid)
+    
+        //     // Mettre a jour dans IDB
+        //     collectionsDao.updateDocument(fichier, {dechiffre})
+        //         .catch(err=>console.error("Erreur maj document %O dans idb : %O", fichier, err))
+    
+        //     // console.debug("traiterDechiffrerFichiers chargeTuuids dispatch merge %O", fichier)
+        //     dispatch(mergeTuuidData({tuuid: fichier.tuuid, data: fichier}))
+        // }
+    }
+
     // Async actions
     const thunks = { 
-        rafraichirGroupes,
+        rafraichirGroupes, dechiffrerGroupes,
     }
 
     return thunks
@@ -187,7 +236,7 @@ async function middlewareListener(workers, action, listenerApi) {
     await listenerApi.unsubscribe()
     try {
         // Reset liste de fichiers completes utilises pour calculer pourcentage upload
-        //listenerApi.dispatch(clearCycleDownload())
+        listenerApi.dispatch(thunks.dechiffrerGroupes(workers))
 
         // const task = listenerApi.fork( forkApi => tacheDownload(workers, listenerApi, forkApi) )
         // const stopAction = listenerApi.condition(arretDownload.match)

@@ -32,6 +32,10 @@ export function sauvegarderGroupeUsager(socket, params) {
     return transmettreCommande(socket, params, 'sauvegarderGroupeUsager')
 }
 
+export function getClesGroupes(socket, params) {
+    return transmettreRequete(socket, params, 'getClesGroupes')
+}
+
 async function transmettreRequete(socket, params, action, opts) {
     opts = opts || {}
     const entete = params['en-tete'] || {}

@@ -5,7 +5,7 @@ import documentsSlice from './documentsSlice'
 
 function storeSetup(workers) {
 
-  const groupesMiddleware = groupeMiddlewareSetup()
+  const groupesMiddleware = groupeMiddlewareSetup(workers)
 
   // Configurer le store redux
   const store = configureStore({

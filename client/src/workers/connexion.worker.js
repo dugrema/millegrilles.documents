@@ -1,7 +1,8 @@
 import { expose } from 'comlink'
 import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClient'
 
-const CONST_DOMAINE_DOCUMENTS = 'Documents'
+const CONST_DOMAINE_DOCUMENTS = 'Documents',
+      CONST_DOMAINE_MAITREDESCLES = 'MaitreDesCles'
 
 function getCategoriesUsager(requete) {
   requete = requete || {}
@@ -59,6 +60,20 @@ function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
   )
 }
 
+async function getClesGroupes(liste_hachage_bytes) {
+
+  const params = {
+    liste_hachage_bytes,
+    domaine: CONST_DOMAINE_DOCUMENTS,
+  }
+
+  return ConnexionClient.emitBlocking(
+    'getClesGroupes', 
+    params, 
+    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
+  )
+}
+
 // Evenements
 
 async function ecouterEvenementsCategoriesUsager(cb) {
@@ -84,6 +99,7 @@ expose({
     // Requetes et commandes privees
     getCategoriesUsager, getGroupesUsager,
     sauvegarderCategorieUsager, sauvegarderGroupeUsager,
+    getClesGroupes,
 
     // Event listeners proteges
     ecouterEvenementsCategoriesUsager, retirerEvenementsCategoriesUsager,

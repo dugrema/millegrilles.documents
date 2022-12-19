@@ -13,8 +13,8 @@ import ErrorBoundary from './ErrorBoundary'
 import useWorkers, {useEtatPret, useEtatConnexion, WorkerProvider, useUsager, useFormatteurPret, useInfoConnexion} from './WorkerContext'
 import storeSetup from './redux/store'
 
-import { pushItems as categoriePushItems, mergeItems as categoriesMergeItems, thunks as thunksCategories } from './redux/categoriesSlice'
-import { pushItems as groupesPushItems, mergeItems as groupesMergeItems, thunks as thunksGroupes } from './redux/groupesSlice'
+import { setUserId as setUserIdCategories, pushItems as categoriePushItems, mergeItems as categoriesMergeItems, thunks as thunksCategories } from './redux/categoriesSlice'
+import { setUserId as setUserIdGroupes, pushItems as groupesPushItems, mergeItems as groupesMergeItems, thunks as thunksGroupes } from './redux/groupesSlice'
 
 import { useTranslation } from 'react-i18next'
 import './i18n'
@@ -71,6 +71,7 @@ function LayoutMain(props) {
   const { i18n, t } = useTranslation()
 
   const workers = useWorkers()
+  const dispatch = useDispatch()
   const usager = useUsager()
   const etatConnexion = useEtatConnexion()
   const etatFormatteurMessage = useFormatteurPret()
@@ -90,7 +91,12 @@ function LayoutMain(props) {
   }, [usager])
 
   // Setup userId dans redux
-  //useEffect(()=>{dispatch(setUserIdDocuments(userId))}, [userId])
+  useEffect(()=>{
+    if(!usager) return
+    const userId = usager.extensions.userId
+    dispatch(setUserIdCategories(userId))
+    dispatch(setUserIdGroupes(userId))
+  }, [dispatch, usager])
 
   const menu = (
     <MenuApp 
@@ -132,6 +138,7 @@ function ApplicationDocuments(props) {
   const workers = useWorkers()
   const dispatch = useDispatch()
   const etatPret = useEtatPret()
+  const usager = useUsager()
 
   const categoriesMajHandler = useCallback(comlinkProxy(message => {
     dispatch(categoriesMergeItems(message.message))
@@ -142,7 +149,11 @@ function ApplicationDocuments(props) {
   }), [dispatch])
 
   useEffect(()=>{
-    if(!etatPret) return
+    if(!etatPret || !usager) return
+
+    const userId = usager.extensions.userId
+    dispatch(setUserIdCategories(userId))
+    dispatch(setUserIdGroupes(userId))
 
     // S'assurer d'avoir les categories les plus recentes
     // workers.connexion.getCategoriesUsager()
@@ -178,7 +189,7 @@ function ApplicationDocuments(props) {
       workers.connexion.retirerEvenementsCategoriesUsager()
         .catch(err=>console.warn("Erreur retrait listener categories ", err))
     }
-  }, [workers, dispatch, etatPret, categoriesMajHandler, groupesMajHandler])
+  }, [workers, dispatch, etatPret, usager, categoriesMajHandler, groupesMajHandler])
 
   let Page = null
   switch(sectionAfficher) {
