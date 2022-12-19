@@ -18,6 +18,7 @@ export function configurerEvenements(socket) {
       {eventName: 'sauvegarderCategorieUsager', callback: (params, cb) => traiter(socket, mqdao.sauvegarderCategorieUsager, {params, cb}) },
       {eventName: 'sauvegarderGroupeUsager', callback: (params, cb) => traiter(socket, mqdao.sauvegarderGroupeUsager, {params, cb}) },
       {eventName: 'getClesGroupes', callback: (params, cb) => traiter(socket, mqdao.getClesGroupes, {params, cb}) },
+      {eventName: 'sauvegarderDocument', callback: (params, cb) => traiter(socket, mqdao.sauvegarderDocument, {params, cb}) },
 
       // Listeners
       {eventName: 'ecouterEvenementsCategoriesUsager', callback: (_, cb) => {mqdao.ecouterEvenementsCategoriesUsager(socket, cb)}},

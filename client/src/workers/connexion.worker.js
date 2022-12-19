@@ -30,6 +30,20 @@ function getGroupesUsager(requete) {
   )
 }
 
+async function getClesGroupes(liste_hachage_bytes) {
+
+  const params = {
+    liste_hachage_bytes,
+    domaine: CONST_DOMAINE_DOCUMENTS,
+  }
+
+  return ConnexionClient.emitBlocking(
+    'getClesGroupes', 
+    params, 
+    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
+  )
+}
+
 function sauvegarderCategorieUsager(categorie) {
   return ConnexionClient.emitBlocking(
     'sauvegarderCategorieUsager', 
@@ -60,17 +74,11 @@ function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
   )
 }
 
-async function getClesGroupes(liste_hachage_bytes) {
-
-  const params = {
-    liste_hachage_bytes,
-    domaine: CONST_DOMAINE_DOCUMENTS,
-  }
-
+function sauvegarderDocument(doc) {
   return ConnexionClient.emitBlocking(
-    'getClesGroupes', 
-    params, 
-    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
+    'sauvegarderDocument', 
+    doc,
+    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'sauvegarderDocument', ajouterCertificat: true}
   )
 }
 
@@ -98,7 +106,7 @@ expose({
 
     // Requetes et commandes privees
     getCategoriesUsager, getGroupesUsager,
-    sauvegarderCategorieUsager, sauvegarderGroupeUsager,
+    sauvegarderCategorieUsager, sauvegarderGroupeUsager, sauvegarderDocument,
     getClesGroupes,
 
     // Event listeners proteges

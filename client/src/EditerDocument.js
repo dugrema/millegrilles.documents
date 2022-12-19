@@ -14,10 +14,12 @@ function EditerDocument(props) {
 
     const { groupeId } = props
 
+    const workers = useWorkers()
     const dispatch = useDispatch()
     const groupes = useSelector(state=>state.groupes.liste)
     const categories = useSelector(state=>state.categories.liste)
 
+    const [docId, setDocId] = useState('')
     const [contenuDocument, setContenuDocument] = useState('')
 
     const onContenuChangeHandler = useCallback(event=>{
@@ -37,7 +39,25 @@ function EditerDocument(props) {
 
     const sauvegarderHandler = useCallback(event=>{
         console.debug("sauvegarder : ", contenuDocument)
-    }, [contenuDocument])
+        const ref_hachage_bytes = groupe.ref_hachage_bytes
+        const commande = {
+            groupe_id: groupe.groupe_id,
+        }
+        if(docId) commande.doc_id = docId
+        
+        workers.clesDao.getCles(ref_hachage_bytes)
+            .then( async cle => {
+                cle = cle[ref_hachage_bytes]
+                console.debug("Cle pour chiffrer document : ", cle)
+                const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(contenuDocument, cle.cleSecrete)
+                console.debug("Champs chiffres ", champsChiffres)
+                Object.assign(commande, champsChiffres)
+
+                const reponse = await workers.connexion.sauvegarderDocument(commande)
+                console.debug("Reponse sauvegarder document ", reponse)
+            })
+            .catch(err=>console.error("Erreur sauvegarde document ", err))
+    }, [workers, groupe, docId, contenuDocument])
 
     const fermerHandler = useCallback(()=>dispatch(setDocumentId(null)))
 

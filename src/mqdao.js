@@ -36,6 +36,10 @@ export function getClesGroupes(socket, params) {
     return transmettreRequete(socket, params, 'getClesGroupes')
 }
 
+export function sauvegarderDocument(socket, params) {
+    return transmettreCommande(socket, params, 'sauvegarderDocument')
+}
+
 async function transmettreRequete(socket, params, action, opts) {
     opts = opts || {}
     const entete = params['en-tete'] || {}
