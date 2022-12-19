@@ -44,6 +44,19 @@ async function getClesGroupes(liste_hachage_bytes) {
   )
 }
 
+async function getDocumentsGroupe(groupe_id) {
+
+  const params = {
+    groupe_id,
+  }
+
+  return ConnexionClient.emitBlocking(
+    'getDocumentsGroupe', 
+    params, 
+    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getDocumentsGroupe', ajouterCertificat: true}
+  )
+}
+
 function sauvegarderCategorieUsager(categorie) {
   return ConnexionClient.emitBlocking(
     'sauvegarderCategorieUsager', 
@@ -100,6 +113,15 @@ async function retirerEvenementsGroupesUsager(cb) {
   return ConnexionClient.unsubscribe('retirerEvenementsGroupesUsager', cb, {}) 
 }
 
+async function ecouterEvenementsDocumentsUsager(cb) {
+  return ConnexionClient.subscribe('ecouterEvenementsDocumentsUsager', cb, {}) 
+}
+
+async function retirerEvenementsDocumentsUsager(cb) {
+  return ConnexionClient.unsubscribe('retirerEvenementsDocumentsUsager', cb, {}) 
+}
+
+
 // Exposer methodes du Worker
 expose({
     ...ConnexionClient, 
@@ -107,10 +129,10 @@ expose({
     // Requetes et commandes privees
     getCategoriesUsager, getGroupesUsager,
     sauvegarderCategorieUsager, sauvegarderGroupeUsager, sauvegarderDocument,
-    getClesGroupes,
+    getDocumentsGroupe, getClesGroupes,
 
     // Event listeners proteges
     ecouterEvenementsCategoriesUsager, retirerEvenementsCategoriesUsager,
     ecouterEvenementsGroupesUsager, retirerEvenementsGroupesUsager,
-
+    ecouterEvenementsDocumentsUsager, retirerEvenementsDocumentsUsager,
 })

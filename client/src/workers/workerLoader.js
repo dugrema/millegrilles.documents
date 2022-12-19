@@ -3,6 +3,7 @@ import { usagerDao } from '@dugrema/millegrilles.reactjs'
 
 import * as categoriesDao from '../redux/categoriesIdbDao'
 import * as groupesDao from '../redux/groupesIdbDao'
+import * as documentsDao from '../redux/documentsIdbDao'
 import clesDao from '../redux/clesDao'
 
 // Exemple de loader pour web workers
@@ -24,6 +25,7 @@ export function setupWorkers() {
   workers.clesDao = clesDao(workers)              // Cles asymetriques
   workers.categoriesDao = categoriesDao
   workers.groupesDao = groupesDao
+  workers.documentsDao = documentsDao
   
   const location = new URL(window.location)
   location.pathname = '/fiche.json'

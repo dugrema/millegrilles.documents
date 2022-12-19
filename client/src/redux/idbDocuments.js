@@ -37,7 +37,8 @@ function createObjectStores(db, oldVersion) {
                 groupeStore = db.createObjectStore(STORE_GROUPES, {keyPath: 'groupe_id'})
                 groupeStore.createIndex('userid', 'user_id', {unique: false, multiEntry: false})
 
-                documentStore = db.createObjectStore(STORE_DOCUMENTS, {keyPath: 'document_id'})
+                documentStore = db.createObjectStore(STORE_DOCUMENTS, {keyPath: 'doc_id'})
+                documentStore.createIndex('userid', 'user_id', {unique: false, multiEntry: false})
                 documentStore.createIndex('useridGroupe', ['user_id', 'groupe_id'], {unique: false, multiEntry: false})
             case 1: // Plus recent, rien a faire
                 break

@@ -38,10 +38,11 @@ function EditerDocument(props) {
     }, [categories, groupes, groupeId])
 
     const sauvegarderHandler = useCallback(event=>{
-        console.debug("sauvegarder : ", contenuDocument)
+        console.debug("sauvegarder : %O dans groupe %O, categorie: %O", contenuDocument, groupe, categorie)
         const ref_hachage_bytes = groupe.ref_hachage_bytes
         const commande = {
             groupe_id: groupe.groupe_id,
+            categorie_version: categorie.version,
         }
         if(docId) commande.doc_id = docId
         
@@ -57,7 +58,7 @@ function EditerDocument(props) {
                 console.debug("Reponse sauvegarder document ", reponse)
             })
             .catch(err=>console.error("Erreur sauvegarde document ", err))
-    }, [workers, groupe, docId, contenuDocument])
+    }, [workers, categorie, groupe, docId, contenuDocument])
 
     const fermerHandler = useCallback(()=>dispatch(setDocumentId(null)))
 

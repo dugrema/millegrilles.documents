@@ -160,7 +160,7 @@ function ApplicationDocuments(props) {
     dispatch(thunksCategories.rafraichirCategories(workers))
       .catch(err=>console.error("Erreur chargement categories ", err))
 
-      dispatch(thunksGroupes.rafraichirGroupes(workers))
+    dispatch(thunksGroupes.rafraichirGroupes(workers))
       .catch(err=>console.error("Erreur chargement groupes", err))
 
     workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)

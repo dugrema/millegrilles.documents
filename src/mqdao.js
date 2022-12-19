@@ -24,6 +24,10 @@ export function getGroupesUsager(socket, params) {
     return transmettreRequete(socket, params, 'getGroupesUsager')
 }
 
+export function getDocumentsGroupe(socket, params) {
+    return transmettreRequete(socket, params, 'getDocumentsGroupe')
+}
+
 export function sauvegarderCategorieUsager(socket, params) {
     return transmettreCommande(socket, params, 'sauvegarderCategorieUsager')
 }
@@ -114,6 +118,21 @@ export async function ecouterEvenementsGroupesUsager(socket, cb) {
 export async function retirerEvenementsGroupesUsager(socket, cb) {
     const routingKeys = [
         `evenement.Documents.${socket.userId}.sauvegarderGroupeUsager`,
+    ]
+    socket.unsubscribe({routingKeys, exchanges: [L2Prive]})
+    if(cb) cb(true)
+}
+
+export async function ecouterEvenementsDocumentsUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderDocument`,
+    ]
+    socket.subscribe({routingKeys, exchanges: [L2Prive]}, cb)
+}
+
+export async function retirerEvenementsDocumentsUsager(socket, cb) {
+    const routingKeys = [
+        `evenement.Documents.${socket.userId}.sauvegarderDocument`,
     ]
     socket.unsubscribe({routingKeys, exchanges: [L2Prive]})
     if(cb) cb(true)

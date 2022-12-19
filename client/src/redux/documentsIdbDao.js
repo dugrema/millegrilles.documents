@@ -7,53 +7,51 @@ export function init() {
 }
 
 // Met dirty a true et dechiffre a false si mismatch derniere_modification
-export async function syncDocuments(docs) {
+export async function syncDocuments(docs, opts) {
+    opts = opts || {}
     if(!docs) return []
 
     const db = await ouvrirDB()
     const store = db.transaction(STORE_DOCUMENTS, 'readwrite').store
 
-    let dirtyDocs = []
     for await (const infoDoc of docs) {
-        const { document_id, derniere_modification } = infoDoc
-        const documentDoc = await store.get(document_id)
+        console.debug("Conserver doc ", infoDoc)
+        const { doc_id, header } = infoDoc
+        const documentDoc = await store.get(doc_id)
         if(documentDoc) {
-            if(derniere_modification !== documentDoc.derniere_modification) {
-                // Fichier connu avec une date differente
-                dirtyDocs.push(document_id)
-                if(documentDoc.dirty !== false) {
-                    // Conserver flag dirty
-                    documentDoc.dirty = true
-                    await store.put(documentDoc)
-                }
-            } else if(documentDoc.dirty) {
-                // Flag existant
-                dirtyDocs.push(document_id)
+            if(header !== documentDoc.header) {
+                // Fichier connu avec une version differente
+                await store.update({...documentDoc, ...infoDoc})
             }
         } else {
-            // Fichier inconnu
-            dirtyDocs.push(document_id)
+            const user_id = infoDoc.user_id || opts.userId
+            if(!user_id) throw new Error("UserId manquant")
+            await store.put({...infoDoc, user_id})
         }
     }
-
-    return dirtyDocs
 }
 
 // opts {merge: true, dechiffre: true}, met dirty a false
 export async function updateDocument(doc, opts) {
     opts = opts || {}
+    const dechiffre = opts.dechiffre
 
-    const { document_id, user_id } = doc
-    if(!document_id) throw new Error('updateDocument document_id doit etre fourni')
+    const { doc_id, user_id } = doc
+    if(!doc_id) throw new Error('updateDocument document_id doit etre fourni')
     if(!user_id) throw new Error('updateDocument user_id doit etre fourni')
 
     const flags = ['dirty', 'dechiffre', 'expiration']
           
     const db = await ouvrirDB()
     const store = db.transaction(STORE_DOCUMENTS, 'readwrite').store
-    const documentDoc = (await store.get(document_id)) || {}
+    const documentDoc = (await store.get(doc_id)) || {}
     Object.assign(documentDoc, doc)
     
+    if(dechiffre === true) {
+        // Retirer champ data_chiffre
+        delete documentDoc.data_chiffre
+    }
+
     // Changer flags
     flags.forEach(flag=>{
         const val = opts[flag]
@@ -79,7 +77,7 @@ export async function getParDocumentIds(document_ids) {
 }
 
 // cuuid falsy donne favoris
-export async function getParGroupe(groupeId, userId) {
+export async function getParGroupeId(userId, groupeId) {
     const db = await ouvrirDB()
 
     const store = db.transaction(STORE_DOCUMENTS, 'readonly').store        
@@ -102,6 +100,21 @@ export async function getParGroupe(groupeId, userId) {
     // console.debug('getParCollection cuuid %s userId: %s resultat collection %O, documents %O', cuuid, userId, collection, docs)
 
     return { documents: docs }
+}
+
+export async function getDocumentsChiffres(userId) {
+    console.debug("Get documents chiffres userId ", userId)
+    const db = await ouvrirDB()
+    const store = db.transaction(STORE_DOCUMENTS, 'readonly').store
+    const index = store.index('userid')
+    let curseur = await index.openCursor(userId)
+    const groupes = []
+    while(curseur) {
+        const value = curseur.value
+        if(value.data_chiffre) groupes.push(value)
+        curseur = await curseur.continue()
+    }
+    return groupes
 }
 
 // Supprime le contenu de idb

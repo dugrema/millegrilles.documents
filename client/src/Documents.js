@@ -1,6 +1,7 @@
-import { lazy, useState, useCallback, useEffect } from 'react'
+import { lazy, useState, useCallback, useEffect, useMemo } from 'react'
+import { proxy as comlinkProxy } from 'comlink'
 
-import useWorkers from './WorkerContext'
+import useWorkers, { useUsager, useEtatPret } from './WorkerContext'
 
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
@@ -9,20 +10,30 @@ import Col from 'react-bootstrap/Col'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { setDocumentId } from './redux/documentsSlice'
-
-import { SelectionCategorie } from './EditerGroupe'
+import { setUserId, setGroupeId, setDocumentId, mergeItems as documentsMergeItems, thunks as thunksDocuments } from './redux/documentsSlice'
 
 const AfficherDocument = lazy( () => import('./AfficherDocument') )
 const EditerDocument = lazy( () => import('./EditerDocument') )
 
 function AfficherDocuments(props) {
 
+    const dispatch = useDispatch()
+    const usager = useUsager()
+    const etatPret = useEtatPret()
+
     const groupes = useSelector(state=>state.groupes.liste)
 
-    const [groupeId, setGroupeId] = useState('')
+    const groupeIdChangeHandler = useCallback(event=>{
+        const groupeId = event.currentTarget.value
+        dispatch(setGroupeId(groupeId))
+    }, [dispatch])
 
-    const groupeIdChangeHandler = useCallback(event=>setGroupeId(event.currentTarget.value), [setGroupeId])
+    useEffect(()=>{
+        if(!etatPret || !usager) return
+    
+        const userId = usager.extensions.userId
+        dispatch(setUserId(userId))
+    }, [dispatch, usager])
 
     return (
         <div>
@@ -30,7 +41,7 @@ function AfficherDocuments(props) {
 
             <p></p>
 
-            <AfficherListeDocuments groupeId={groupeId} />
+            <AfficherListeDocuments />
 
         </div>
     )
@@ -39,15 +50,54 @@ function AfficherDocuments(props) {
 export default AfficherDocuments
 
 function AfficherListeDocuments(props) {
-    const { groupeId } = props
-
+    
     const dispatch = useDispatch()
-
+    const workers = useWorkers()
+    const etatPret = useEtatPret()
+    const groupeId = useSelector(state=>state.documents.groupeId)
     const documentId = useSelector(state=>state.documents.documentId)
+    const groupes = useSelector(state=>state.groupes.liste)
+    const categories = useSelector(state=>state.categories.liste)
+    const listeDocuments = useSelector(state=>state.documents.liste) || []
 
+    const groupe = useMemo(()=>{
+        if(!groupes || !groupeId) return null
+        return groupes.filter(item=>item.groupe_id === groupeId).pop()
+    }, [groupes, groupeId])
+
+    const categorie = useMemo(()=>{
+        if(!groupe || !categories) return null
+        const categorieId = groupe.categorie_id
+        return categories.filter(item=>item.categorie_id === categorieId).pop()
+    }, [groupe, categories])
+
+    const documentsMajHandler = useCallback(comlinkProxy(message => {
+        dispatch(documentsMergeItems(message.message))
+      }), [dispatch])
+    
     const documentNewHandler = useCallback(()=>{
         dispatch(setDocumentId(true))
     }, [dispatch])
+
+    useEffect(()=>{
+        if(!etatPret) return
+
+        // Mettre listener en place pour les documents de l'usager (tous les groupes)
+        workers.connexion.ecouterEvenementsDocumentsUsager(documentsMajHandler)
+          .catch(err=>console.error("Erreur ecouterEvenementsDocumentsUsager ", err))
+    
+        return () => { 
+          workers.connexion.retirerEvenementsDocumentsUsager()
+            .catch(err=>console.warn("Erreur retrait listener documents usager ", err))
+        }
+
+    }, [workers, dispatch, etatPret, documentsMajHandler])
+
+    useEffect(()=>{
+        if(!groupe || !categorie || categorie.categorie_id !== groupe.categorie_id) return
+        dispatch(thunksDocuments.rafraichirDocuments(workers))
+            .catch(err=>console.error("Erreur chargement documents ", err))
+    }, [workers, dispatch, groupe, categorie])
 
     if(documentId === true) {
         return (
@@ -65,11 +115,15 @@ function AfficherListeDocuments(props) {
             <p></p>
 
             <Row>
-                <Col>Liste</Col>
+                <Col>Liste de {listeDocuments.length} documents</Col>
                 <Col>
                     <Button variant="secondary" onClick={documentNewHandler}>+ Nouveau</Button>
                 </Col>
             </Row>
+
+            {listeDocuments.map(item=>(
+                <DocumentRow key={item.doc_id} value={item} groupe={groupe} categorie={categorie} />
+            ))}
 
         </div>
     )
@@ -111,4 +165,17 @@ function SelectionGroupeOptions(props) {
 
     return [optionSelect, ...options]
 
+}
+
+function DocumentRow(props) {
+
+    const { value, categorie } = props
+
+    const label = value.doc_id
+
+    return (
+        <Row>
+            <Col>{label}</Col>
+        </Row>
+    )
 }
