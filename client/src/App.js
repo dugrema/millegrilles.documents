@@ -157,26 +157,11 @@ function ApplicationDocuments(props) {
     dispatch(setUserIdGroupes(userId))
 
     // S'assurer d'avoir les categories les plus recentes
-    // workers.connexion.getCategoriesUsager()
-    //   .then(reponse=>{
-    //     if(reponse.categories) {
-    //       return dispatch(categoriePushItems({liste: reponse.categories, clear: true}))
-    //     }
-    //   })
-    //   .catch(err=>console.error("Erreur chargement categories : ", err))
     dispatch(thunksCategories.rafraichirCategories(workers))
-      .catch(err=>console.error("Erreur chargement categories"))
+      .catch(err=>console.error("Erreur chargement categories ", err))
 
-    // workers.connexion.getGroupesUsager()
-    //   .then(reponse=>{
-    //     if(reponse.groupes) {
-    //       console.debug("Recu groupes : ", reponse.groupes)
-    //       return dispatch(groupesPushItems({liste: reponse.groupes, clear: true}))
-    //     }
-    //   })
-    //   .catch(err=>console.error("Erreur chargement groupes : ", err))
-    dispatch(thunksGroupes.rafraichirGroupes(workers))
-      .catch(err=>console.error("Erreur chargement groupes"))
+      dispatch(thunksGroupes.rafraichirGroupes(workers))
+      .catch(err=>console.error("Erreur chargement groupes", err))
 
     workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
       .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))

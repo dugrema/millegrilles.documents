@@ -87,11 +87,21 @@ function FormGroupe(props) {
 
                     console.debug("Commande maitre des cles : %O", _commandeMaitrecles)
                     commandeMaitrecles = _commandeMaitrecles
-                } else {
+                } else if(groupe.ref_hachage_bytes) {
                     commande.groupe_id = groupe.groupe_id
+                    commande.ref_hachage_bytes = groupe.ref_hachage_bytes
+
+                    // Recuperer cle pour re-chiffrer
+                    let cle = await workers.clesDao.getCles(groupe.ref_hachage_bytes)
+                    cle = cle[groupe.ref_hachage_bytes]
+
+                    const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(metadataDechiffre, cle.cleSecrete)
+                    Object.assign(commande, champsChiffres)
+                } else {
+                    throw new Error('Cle manquante')
                 }
         
-                console.debug("Sauvegarder groupe : %O, commande maitre des cles : %O", commande, commandeMaitrecles)
+                // console.debug("Sauvegarder groupe : %O, commande maitre des cles : %O", commande, commandeMaitrecles)
                 const reponse = await workers.connexion.sauvegarderGroupeUsager(commande, commandeMaitrecles)
                 if(reponse.ok === true) fermer()
               })
