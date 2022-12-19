@@ -48,8 +48,12 @@ function clearAction(state) {
     state.liste = null
 }
 
-// payload {uuid_appareil, ...data}
 function mergeItemsAction(state, action) {
+    return mergeItemsInnerAction(state, action)
+}
+
+// payload {uuid_appareil, ...data}
+function mergeItemsInnerAction(state, action) {
     const mergeVersion = state.mergeVersion
     state.mergeVersion++
 
@@ -114,6 +118,7 @@ const groupesSlice = createSlice({
         setGroupeId: setGroupeIdAction,
         pushItems: pushItemsAction, 
         mergeItems: mergeItemsAction,
+        mergeItemsInner: mergeItemsInnerAction,
         clearItems: clearAction,
         setSortKeys: setSortKeysAction,
     }
@@ -130,7 +135,25 @@ function creerThunks(actions) {
     // Action creators are generated for each case reducer function
     const { 
         setGroupeId, pushItems, mergeItems, clearItems, setSortKeys,
+        mergeItemsInner,
     } = actions
+
+    function recevoirGroupe(workers, groupe) {
+        return (dispatch, getState) => traiterRecevoirGroupe(workers, groupe, dispatch, getState)
+    }
+
+    async function traiterRecevoirGroupe(workers, groupe, dispatch, getState) {
+        console.debug('traiterRecevoirGroupe')
+        const { groupesDao } = workers
+    
+        const state = getState().groupes
+        const { userId } = state
+    
+        const groupeMaj = {...groupe, user_id: userId}
+        await groupesDao.updateGroupe(groupeMaj)
+
+        dispatch(mergeItems(groupeMaj))
+    }
 
     function rafraichirGroupes(workers) {
         return (dispatch, getState) => traiterRafraichirGroupes(workers, dispatch, getState)
@@ -183,33 +206,30 @@ function creerThunks(actions) {
             const cles = await clesDao.getCles(liste_hachage_bytes)
             console.debug("Cles recues : ", cles)
             for await (const groupe of groupesChiffres) {
-                // const metaDechiffree = await chiffrage.chiffrage.dechiffrerChampsChiffres(metadata, cleMetadata)
+                const cleMetadata = cles[groupe.ref_hachage_bytes]
+                if(cleMetadata) {
+                    const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(groupe, cleMetadata)
+                    console.debug("Meta dechiffree : ", metaDechiffree)
+                    const groupeMaj = {
+                        ...metaDechiffree, 
+                        groupe_id: groupe.groupe_id, user_id: userId,
+                    }
+                    await groupesDao.updateGroupe(groupeMaj)
+                    dispatch(mergeItemsInner(groupeMaj))
+                } else {
+                    console.warn("Cle manquante pour groupe %s", groupe.groupe_nom)
+                }
             }
     
         } catch(err) {
             console.error("Erreur chargement cles %O : %O", liste_hachage_bytes, err)
         }
 
-        // // console.debug('traiterDechiffrerFichiers Cles a extraire : %O de fichiers %O', clesHachage_bytes, fichiersChiffres)
-        // if(fichiersChiffres.length > 0) dispatch(pushFichiersChiffres(fichiersChiffres))
-    
-        // const tuuidsChiffres = fichiersChiffres.map(item=>item.tuuid)
-        // for (const fichier of fichiers) {
-        //     // console.debug("traiterDechiffrerFichiers Dechiffrer fichier ", fichier)
-        //     const dechiffre = ! tuuidsChiffres.includes(fichier.tuuid)
-    
-        //     // Mettre a jour dans IDB
-        //     collectionsDao.updateDocument(fichier, {dechiffre})
-        //         .catch(err=>console.error("Erreur maj document %O dans idb : %O", fichier, err))
-    
-        //     // console.debug("traiterDechiffrerFichiers chargeTuuids dispatch merge %O", fichier)
-        //     dispatch(mergeTuuidData({tuuid: fichier.tuuid, data: fichier}))
-        // }
     }
 
     // Async actions
     const thunks = { 
-        rafraichirGroupes, dechiffrerGroupes,
+        recevoirGroupe, rafraichirGroupes, dechiffrerGroupes,
     }
 
     return thunks
@@ -231,33 +251,15 @@ export function middlewareSetup(workers) {
 
 async function middlewareListener(workers, action, listenerApi) {
     console.debug("middlewareListener running effect, action : %O", action)
-    // console.debug("Arret upload info : %O", arretUpload)
 
     await listenerApi.unsubscribe()
     try {
-        // Reset liste de fichiers completes utilises pour calculer pourcentage upload
         listenerApi.dispatch(thunks.dechiffrerGroupes(workers))
-
-        // const task = listenerApi.fork( forkApi => tacheDownload(workers, listenerApi, forkApi) )
-        // const stopAction = listenerApi.condition(arretDownload.match)
-        // await Promise.race([task.result, stopAction])
-
-        // console.debug("downloaderMiddlewareListener Task %O\nstopAction %O", task, stopAction)
-        // task.result.catch(err=>console.error("Erreur task : %O", err))
-        // stopAction
-        //     .then(()=>task.cancel())
-        //     .catch(()=>{
-        //         // Aucun impact
-        //     })
-
-        // const resultat = await task.result  // Attendre fin de la tache en cas d'annulation
         console.debug("middlewareListener Sequence terminee")
     } finally {
         await listenerApi.subscribe()
     }
 }
-
-
 
 function genererTriListe(sortKeys) {
     

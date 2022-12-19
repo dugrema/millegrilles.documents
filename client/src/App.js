@@ -145,7 +145,8 @@ function ApplicationDocuments(props) {
   }), [dispatch])
 
   const groupesMajHandler = useCallback(comlinkProxy(message => {
-    dispatch(groupesMergeItems(message.message))
+    // dispatch(groupesMergeItems(message.message))
+    dispatch(thunksGroupes.recevoirGroupe(workers, message.message))
   }), [dispatch])
 
   useEffect(()=>{

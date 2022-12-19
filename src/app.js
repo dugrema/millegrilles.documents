@@ -30,6 +30,7 @@ export default async function app(params) {
     const route = express.Router()
     app.use('/documents', route)
     route.use((req, res, next)=>{
+      debug("app : %s", req.url)
       req.mqdao = mqdao
       next()
     })
