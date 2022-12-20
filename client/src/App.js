@@ -15,6 +15,7 @@ import storeSetup from './redux/store'
 
 import { setUserId as setUserIdCategories, pushItems as categoriePushItems, mergeItems as categoriesMergeItems, thunks as thunksCategories } from './redux/categoriesSlice'
 import { setUserId as setUserIdGroupes, pushItems as groupesPushItems, mergeItems as groupesMergeItems, thunks as thunksGroupes } from './redux/groupesSlice'
+import { clearContenuDechiffre } from './redux/idbDocuments'
 
 import { useTranslation } from 'react-i18next'
 import './i18n'
@@ -211,12 +212,24 @@ function MenuApp(props) {
   const [showModalInfo, setShowModalInfo] = useState(false)
   const handlerCloseModalInfo = useCallback(()=>setShowModalInfo(false), [setShowModalInfo])
 
+  const deconnecterHandler = useCallback(()=>{
+    // Supprimer les cles, contenu dechiffre
+    Promise.resolve()
+      .then(async ()=>{
+        await clearContenuDechiffre()
+      })
+      .catch(err=>console.error('Erreur cleanup ', err))
+      .finally(()=>{
+        window.location = '/millegrilles/authentification/fermer'
+      })
+  }, [])
+
   const handlerSelect = useCallback(eventKey => {
       switch(eventKey) {
         case 'groupes': setSectionAfficher('Groupes'); break
         case 'categories': setSectionAfficher('Categories'); break
         case 'portail': window.location = '/millegrilles'; break
-        case 'deconnecter': window.location = '/millegrilles/authentification/fermer'; break
+        case 'deconnecter': deconnecterHandler(); break
         case 'information': setShowModalInfo(true); break
         default:
           setSectionAfficher('')

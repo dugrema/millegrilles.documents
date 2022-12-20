@@ -50,3 +50,13 @@ function createObjectStores(db, oldVersion) {
         throw err
     }
 }
+
+export async function clearContenuDechiffre() {
+    const db = await ouvrirDB()
+    await db.transaction(STORE_GROUPES, 'readwrite').store.clear()
+    await db.transaction(STORE_DOCUMENTS, 'readwrite').store.clear()
+
+    // TODO : deplacer vers section globale
+    const dbMillegrille = await openDB('millegrilles')
+    await dbMillegrille.transaction('clesDechiffrees', 'readwrite').store.clear()
+}
