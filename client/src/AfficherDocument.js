@@ -10,7 +10,7 @@ import { setDocId } from './redux/documentsSlice'
 
 
 function AfficherDocument(props) {
-    const { groupeId } = props
+    const { groupeId, editer } = props
 
     const dispatch = useDispatch()
     const docId = useSelector(state=>state.documents.docId)
@@ -38,17 +38,16 @@ function AfficherDocument(props) {
 
     return (
         <div>
-            <MasqueContenu 
-                categorie={categorie} 
-                contenu={contenuDocument} />
-
-            <p></p>
-
             <Row>
                 <Col>
+                    <Button variant="secondary" onClick={editer} value='true'>Editer</Button>
                     <Button variant="secondary" onClick={fermerHandler}>Retour</Button>
                 </Col>
             </Row>
+
+            <MasqueContenu 
+                categorie={categorie} 
+                contenu={contenuDocument} />
         </div>
     )
 }

@@ -12,7 +12,7 @@ import { setDocId } from './redux/documentsSlice'
 
 function EditerDocument(props) {
 
-    const { groupeId } = props
+    const { groupeId, editer } = props
 
     const workers = useWorkers()
     const dispatch = useDispatch()
@@ -38,7 +38,10 @@ function EditerDocument(props) {
         return [groupe, categorie]
     }, [categories, groupes, groupeId])
 
-    const fermerHandler = useCallback(()=>dispatch(setDocId(null)))
+    const fermerHandler = useCallback(()=>{
+        editer(false)
+        dispatch(setDocId(null))
+    }, [dispatch, editer])
 
     const sauvegarderHandler = useCallback(event=>{
         console.debug("sauvegarder : %O dans groupe %O, categorie: %O", contenuDocument, groupe, categorie)

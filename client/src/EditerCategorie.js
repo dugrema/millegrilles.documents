@@ -18,11 +18,11 @@ function EditerCategorie(props) {
             <Row>
                 <Col xs={8} md={10} lg={11}><h2>Categorie</h2></Col>
                 <Col><Button variant="secondary" onClick={fermer}>X</Button></Col>
-                <FormCategorie 
-                    categorie={categorie} 
-                    fermer={fermer} />
             </Row>
 
+            <FormCategorie 
+                    categorie={categorie} 
+                    fermer={fermer} />
         </div>
     )
 }
@@ -193,6 +193,7 @@ function SelectTypeChamp(props) {
             <option value="password">Mot de passe</option>
             <option value="number">Nombre</option>
             <option value="url">URL</option>
+            <option value="html">Editeur</option>
         </Form.Select>
     )
 

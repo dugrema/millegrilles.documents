@@ -1,4 +1,4 @@
-import { lazy, useCallback, useEffect, useMemo } from 'react'
+import { lazy, useState, useCallback, useEffect, useMemo } from 'react'
 import { proxy as comlinkProxy } from 'comlink'
 
 import useWorkers, { useUsager, useEtatPret } from './WorkerContext'
@@ -60,6 +60,8 @@ function AfficherListeDocuments(props) {
     const categories = useSelector(state=>state.categories.liste)
     const listeDocuments = useSelector(state=>state.documents.liste) || []
 
+    const [editer, setEditer] = useState(false)
+
     const groupe = useMemo(()=>{
         if(!groupes || !groupeId) return null
         return groupes.filter(item=>item.groupe_id === groupeId).pop()
@@ -85,6 +87,15 @@ function AfficherListeDocuments(props) {
     
     const documentNewHandler = useCallback(()=>dispatch(setDocId(true)), [dispatch])
     const docIdChangeHandler = useCallback(event => dispatch(setDocId(event.currentTarget.value)), [dispatch])
+    const editerHandler = useCallback(event=>{
+        if(event && event.currentTarget) {
+            setEditer(event.currentTarget.value==='true')
+        } else if(event === true) {
+            setEditer(true)
+        } else {
+            setEditer(false)
+        }
+    }, [setEditer])
 
     useEffect(()=>{
         if(!etatPret) return
@@ -106,13 +117,13 @@ function AfficherListeDocuments(props) {
             .catch(err=>console.error("Erreur chargement documents ", err))
     }, [workers, dispatch, groupe, categorie])
 
-    if(docId === true) {
+    if(docId === true || editer === true) {
         return (
-            <EditerDocument groupeId={groupeId} />
+            <EditerDocument groupeId={groupeId} editer={editerHandler} />
         )
     } else if(docId) {
         return (
-            <AfficherDocument groupeId={groupeId} />
+            <AfficherDocument groupeId={groupeId} editer={editerHandler} />
         )
     }
 
