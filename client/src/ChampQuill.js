@@ -5,7 +5,7 @@ function ChampQuill(props) {
     const { name, value, readonly, onChange } = props
 
     const handleChange = useCallback(value=>{
-        onChange({'currentTarget': {name, value}})
+        if(!!onChange) onChange({'currentTarget': {name, value}})
     }, [onChange])
 
     let className = '', theme = 'snow'

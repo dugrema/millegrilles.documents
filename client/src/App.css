@@ -103,7 +103,17 @@ div.table div.table-header {
   font-size: smaller;
 }
 
-.editeur-body {
-  height: 15rem;
-  padding-bottom: 2rem;
+
+@media screen and (min-width: 768px) {
+  .editeur-body {
+    height: 40rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .editeur-body {
+    height: 15rem;
+    padding-bottom: 2rem;
+  }
 }
