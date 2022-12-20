@@ -17,17 +17,18 @@
     "react-bootstrap": "^2.5.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^11.18.3",
+    "react-quill": "^2.0.0",
     "react-scripts": "5.0.1",
     "sass": "^1.55.0",
     "stream-browserify": "^3.0.0"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "^1.8",
     "@dugrema/millegrilles.utiljs": "github:dugrema/millegrilles.utiljs#2022.9",
+    "@reduxjs/toolkit": "^1.8",
     "bootstrap": "^5.1",
     "idb": "^7",
-    "socket.io-client": "^4",
-    "react-redux": "^8.0"
+    "react-redux": "^8.0",
+    "socket.io-client": "^4"
   },
   "scripts": {
     "start": "react-app-rewired start",

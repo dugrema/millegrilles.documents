@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { lazy, useState, useCallback, useEffect, useMemo } from 'react'
 import useWorkers from './WorkerContext'
 
 import Button from 'react-bootstrap/Button'
@@ -9,6 +9,8 @@ import Col from 'react-bootstrap/Col'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { setDocId } from './redux/documentsSlice'
+
+const ChampQuill = lazy( () => import('./ChampQuill') )
 
 function EditerDocument(props) {
 
@@ -119,9 +121,16 @@ function MasqueContenu(props) {
 
     return categorie.champs.map((item, idx)=>{
         const valeurContenu = contenu[item.code_interne] || ''
+
+        // Certains champs prennent toujours toute la largeur de l'ecran
+        let colWidth = {md: 3, xl: 2}
+        if(['html'].includes(item.type_champ)) {
+            colWidth = {}
+        }
+
         return (
             <Row key={idx}>
-                <Col xs={12} md={3} xl={2}>{item.nom_champ}</Col>
+                <Col xs={12} {...colWidth}>{item.nom_champ}</Col>
                 <Col>
                     <ChampInput champ={item} valeur={valeurContenu} onChange={onChange} />
                 </Col>
@@ -142,6 +151,14 @@ function ChampInput(props) {
     } else if(typeChamp === 'number') {
         return (
             <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+        )
+    } else if(typeChamp === 'password') {
+        return (
+            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+        )
+    } else if(typeChamp === 'html') {
+        return (
+            <ChampQuill name={champ.code_interne} value={valeur} onChange={onChange} />
         )
     } else {
         return <p>Type de champ non supporte</p>

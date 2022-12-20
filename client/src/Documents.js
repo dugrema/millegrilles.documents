@@ -1,4 +1,4 @@
-import { lazy, useState, useCallback, useEffect, useMemo } from 'react'
+import { Suspense, lazy, useState, useCallback, useEffect, useMemo } from 'react'
 import { proxy as comlinkProxy } from 'comlink'
 
 import useWorkers, { useUsager, useEtatPret } from './WorkerContext'
@@ -41,7 +41,9 @@ function AfficherDocuments(props) {
 
             <p></p>
 
-            <AfficherListeDocuments />
+            <Suspense fallback={<Attente />}>
+                <AfficherListeDocuments />
+            </Suspense>
 
         </div>
     )
@@ -211,5 +213,13 @@ function DocumentRow(props) {
                 </Button>
             </Col>
         </Row>
+    )
+}
+
+function Attente(_props) {
+    return (
+        <div>
+            <p>Veuillez patienter durant le chargement de la section.</p>
+        </div>
     )
 }

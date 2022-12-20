@@ -74,3 +74,11 @@ $xsmall-width: map.get($grid-breakpoints, xs);
 .categorie-champ DIV {
     margin-bottom: 1rem;
 }
+
+SPAN.ql-picker-label {
+    color: $fourth-color;
+}
+
+.ql-snow .ql-stroke, .ql-snow .ql-fill {
+    stroke: $fourth-color;
+}
