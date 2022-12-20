@@ -302,11 +302,11 @@ function genererTriListe(sortKeys) {
         const { doc_id: document_idA } = a,
               { doc_id: document_idB } = b
 
-        // const labelA = nomA || groupe_idA,
-        //       labelB = nomB || groupe_idB
-        
-        // const compLabel = labelA.localeCompare(labelB)
-        // if(compLabel) return compLabel * ordre
+        const labelA = a[key] || document_idA,
+              labelB = b[key] || document_idB
+
+        const compLabel = labelA.localeCompare(labelB)
+        if(!!compLabel) return compLabel * ordre
 
         // Fallback, tuuid (doit toujours etre different)
         return document_idA.localeCompare(document_idB) * ordre

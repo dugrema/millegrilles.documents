@@ -18,7 +18,7 @@ export async function syncGroupes(groupes, opts) {
         if(groupeDoc) {
             if(groupeDoc.header !== infoGroupe.header) {
                 console.debug("update groupe : ", infoGroupe)
-                await store.update({...groupeDoc, ...infoGroupe})
+                await store.put({...groupeDoc, ...infoGroupe})
             }
         } else {
             console.debug("put groupe : ", infoGroupe)

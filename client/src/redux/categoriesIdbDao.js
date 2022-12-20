@@ -16,7 +16,7 @@ export async function syncCategories(categories) {
         if(categorieDoc) {
             if(categorieDoc.nom_categorie !== infoCategorie.nom_categorie) {
                 console.debug("update categorie : ", infoCategorie)
-                await store.update(infoCategorie)
+                await store.put(infoCategorie)
             }
         } else {
             console.debug("put categorie : ", infoCategorie)

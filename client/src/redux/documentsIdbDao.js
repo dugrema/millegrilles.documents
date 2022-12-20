@@ -21,7 +21,7 @@ export async function syncDocuments(docs, opts) {
         if(documentDoc) {
             if(header !== documentDoc.header) {
                 // Fichier connu avec une version differente
-                await store.update({...documentDoc, ...infoDoc})
+                await store.put({...documentDoc, ...infoDoc})
             }
         } else {
             const user_id = infoDoc.user_id || opts.userId

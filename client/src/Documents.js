@@ -10,7 +10,7 @@ import Col from 'react-bootstrap/Col'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-import { setUserId, setGroupeId, setDocId, thunks as thunksDocuments } from './redux/documentsSlice'
+import { setUserId, setGroupeId, setDocId, setSortKeys as setSortKeysDocuments, thunks as thunksDocuments } from './redux/documentsSlice'
 
 const AfficherDocument = lazy( () => import('./AfficherDocument') )
 const EditerDocument = lazy( () => import('./EditerDocument') )
@@ -113,6 +113,12 @@ function AfficherListeDocuments(props) {
 
     useEffect(()=>{
         if(!groupe || !categorie || categorie.categorie_id !== groupe.categorie_id) return
+        
+        // Maj tri des documents
+        const champLabel = categorie.champs[0]
+        const code_interne = champLabel.code_interne
+        dispatch(setSortKeysDocuments({key: code_interne, ordre: 1}))
+
         dispatch(thunksDocuments.rafraichirDocuments(workers))
             .catch(err=>console.error("Erreur chargement documents ", err))
     }, [workers, dispatch, groupe, categorie])
