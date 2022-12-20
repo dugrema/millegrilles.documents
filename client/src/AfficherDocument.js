@@ -95,6 +95,10 @@ function AfficherChamp(props) {
         return (
             <p>{valeur}</p>
         )
+    } else if(typeChamp === 'url') {
+        return (
+            <p>{valeur}</p>
+        )
     } else if(typeChamp === 'html') {
         return (
             <ChampQuill value={valeur} readonly={true} />

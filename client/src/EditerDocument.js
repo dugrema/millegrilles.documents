@@ -156,6 +156,10 @@ function ChampInput(props) {
         return (
             <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
         )
+    } else if(typeChamp === 'url') {
+        return (
+            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+        )
     } else if(typeChamp === 'html') {
         return (
             <ChampQuill name={champ.code_interne} value={valeur} onChange={onChange} />
