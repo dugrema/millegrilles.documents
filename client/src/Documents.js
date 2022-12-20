@@ -162,13 +162,13 @@ function AfficherListeDocuments(props) {
 export function SelectionnerGroupe(props) {
     const { value, onChange, groupes } = props
 
-    const documentId = useSelector(state=>state.documents.documentId)
+    const docId = useSelector(state=>state.documents.docId)
 
     return (
         <Form.Group as={Row} controlId="groupeId">
             <Form.Label column sm={4} md={2}>Groupe</Form.Label>
             <Col>
-                <Form.Select value={value} onChange={onChange} disabled={!!documentId}>
+                <Form.Select value={value} onChange={onChange} disabled={!!docId}>
                     <SelectionGroupeOptions groupes={groupes} />
                 </Form.Select>        
             </Col>
