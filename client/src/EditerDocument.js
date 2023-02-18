@@ -113,6 +113,8 @@ function EditerDocument(props) {
                     <Button variant="secondary" onClick={fermerHandler}>Annuler</Button>
                 </Col>
             </Row>
+
+            <p></p><p></p>
         </div>
     )
 }
@@ -120,7 +122,9 @@ function EditerDocument(props) {
 export default EditerDocument
 
 function MasqueContenu(props) {
-    const { categorie, contenu, onChange={onChange} } = props
+    const { categorie, contenu, onChange } = props
+
+    if(!contenu) return <p>Chargement en cours</p>
 
     return categorie.champs.map((item, idx)=>{
         const valeurContenu = contenu[item.code_interne] || ''
