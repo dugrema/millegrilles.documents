@@ -1,4 +1,4 @@
-import { lazy, useCallback, useMemo } from 'react'
+import { lazy, useCallback, useState, useEffect, useMemo } from 'react'
 
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
@@ -83,9 +83,10 @@ function AfficherChamp(props) {
 
     const typeChamp = champ.type_champ
 
+
     if(typeChamp === 'text') {
         return (
-            <p>{valeur}</p>
+            <ChampTexteCopier value={valeur} />
         )
     } else if(typeChamp === 'number') {
         return (
@@ -93,7 +94,7 @@ function AfficherChamp(props) {
         )
     } else if(typeChamp === 'password') {
         return (
-            <p>{valeur}</p>
+            <ChampTexteCopier value={valeur} />
         )
     } else if(typeChamp === 'url') {
         return (
@@ -106,5 +107,36 @@ function AfficherChamp(props) {
     } else {
         return <p>Type de champ non supporte</p>
     }
+
+}
+
+function ChampTexteCopier(props) {
+
+    const { className, value } = props
+
+    const [copie, setCopie] = useState(false)
+
+    useEffect(()=>{
+        if(copie) setTimeout(()=>setCopie(false), 5000)
+    }, [copie, setCopie])
+
+    const copierClipboard = useCallback(()=>{
+        navigator.clipboard.writeText(value)
+            .then(()=>{
+                setCopie(true)
+            })
+            .catch(err=>console.error("ChampTexteCopier Erreur ", err))
+    }, [value, setCopie])
+
+    let classNameEffectif = className
+    if(copie) classNameEffectif += ' copie'
+
+    return (
+        <p className={classNameEffectif} onClick={copierClipboard}>
+            {value}
+            {' '}
+            {copie?<i className='fa fa-check'/>:''}
+        </p>
+    )
 
 }
