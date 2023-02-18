@@ -61,6 +61,7 @@ function AfficherListeDocuments(props) {
     const groupes = useSelector(state=>state.groupes.liste)
     const categories = useSelector(state=>state.categories.liste)
     const listeDocuments = useSelector(state=>state.documents.liste) || []
+    const listeRecue = useSelector(state=>state.documents.listeRecue) || false
 
     const [editer, setEditer] = useState(false)
 
@@ -136,6 +137,9 @@ function AfficherListeDocuments(props) {
     }
 
     if(!groupe || !categorie) return ''
+
+    if(!listeRecue) return <p>Chargement en cours</p>
+
     return (
         <div>
             <p></p>

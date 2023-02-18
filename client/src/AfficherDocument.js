@@ -118,6 +118,17 @@ function ChampTexteCopier(props) {
 
     const [copie, setCopie] = useState(false)
 
+    const url = useMemo(()=>{
+        if(!openUrl) return
+        // Valider le URL
+        try {
+            return new URL(value)
+        } catch(err) {
+            // url invalide
+            return ''
+        }
+    }, [openUrl, value])
+
     useEffect(()=>{
         if(copie) setTimeout(()=>setCopie(false), 5000)
     }, [copie, setCopie])
@@ -131,8 +142,8 @@ function ChampTexteCopier(props) {
     }, [value, setCopie])
 
     const openUrlHandler = useCallback(()=>{
-        window.open(value, '_blank', 'noopener=true,noreferrer=true')
-    }, [value])
+        window.open(url.href, '_blank', 'noopener=true,noreferrer=true')
+    }, [url])
 
     let classNameEffectif = className + ' champ-copiable'
     if(copie) classNameEffectif += ' copie'
@@ -143,7 +154,7 @@ function ChampTexteCopier(props) {
                 <p className={classNameEffectif} onClick={copierClipboard}>
                     {value}
                     {' '}
-                    {openUrl?(
+                    {url?(
                         <Button variant='secondary' onClick={openUrlHandler}><i className='fa fa-external-link'/></Button>
                     ):''}
                     {' '}

@@ -9,7 +9,8 @@ const initialState = {
 
     userId: null,
     groupeId: null,                     // Groupe de documents actif (pour navigation)
-    docId: null,                   // Identificateur actif
+    docId: null,                        // Identificateur actif
+    listeRecue: false,                  // True si la liste a ete recue (permet de detecter liste vide)
 }
 
 // Actions
@@ -47,10 +48,12 @@ function pushItemsAction(state, action) {
     liste.sort(genererTriListe(state.sortKeys))
 
     state.liste = liste
+    state.listeRecue = true
 }
 
 function clearAction(state) {
     state.liste = null
+    state.listeRecue = false
 }
 
 // payload {uuid_appareil, ...data}
@@ -109,6 +112,7 @@ function mergeItemsInnerAction(state, action) {
 
     // Trier
     state.liste.sort(genererTriListe(state.sortKeys))
+    state.listeRecue = true
 }
 
 function setDocIdAction(state, action) {
