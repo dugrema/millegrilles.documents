@@ -1,6 +1,6 @@
 {
   "name": "millegrilles.documents",
-  "version": "2022.9.0",
+  "version": "2023.2.0",
   "description": "Documents pour MilleGrilles",
   "main": "index.js",
   "type": "module",  
@@ -12,8 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dugrema/millegrilles.nodejs": "https://github.com/dugrema/millegrilles.nodejs.git#2022.9",
-    "@dugrema/millegrilles.utiljs": "https://github.com/dugrema/millegrilles.utiljs.git#2022.9",
+    "@dugrema/millegrilles.nodejs": "https://github.com/dugrema/millegrilles.nodejs.git#2023.2",
+    "@dugrema/millegrilles.utiljs": "https://github.com/dugrema/millegrilles.utiljs.git#2023.2",
     "debug": "~4.3.4",
     "express": "~4.18.2",
     "express-session": "^1.17.3",

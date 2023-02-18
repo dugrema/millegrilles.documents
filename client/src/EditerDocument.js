@@ -7,6 +7,9 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import { useDispatch, useSelector } from 'react-redux'
+import multibase from 'multibase'
+
+import { getRandom } from '@dugrema/millegrilles.utiljs/src/random'
 
 import { setDocId } from './redux/documentsSlice'
 
@@ -131,9 +134,7 @@ function MasqueContenu(props) {
         return (
             <Row key={idx}>
                 <Col xs={12} {...colWidth}>{item.nom_champ}</Col>
-                <Col>
-                    <ChampInput champ={item} valeur={valeurContenu} onChange={onChange} />
-                </Col>
+                <ChampInput champ={item} valeur={valeurContenu} onChange={onChange} />
             </Row>
         )
     })
@@ -146,26 +147,64 @@ function ChampInput(props) {
 
     if(typeChamp === 'text') {
         return (
-            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            <Col>
+                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            </Col>
         )
     } else if(typeChamp === 'number') {
         return (
-            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            <Col>
+                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            </Col>
         )
     } else if(typeChamp === 'password') {
         return (
-            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            <>
+                <Col>
+                    <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+                </Col>
+                <Col xs={4} sm={3} md={2} xxl={1}>
+                    <GenerateurMotsdepasse variant='secondary' name={champ.code_interne} onChange={onChange} />
+                </Col>
+            </>
         )
     } else if(typeChamp === 'url') {
         return (
-            <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            <Col>
+                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+            </Col>
         )
     } else if(typeChamp === 'html') {
         return (
-            <ChampQuill name={champ.code_interne} value={valeur} onChange={onChange} />
+            <Col>
+                <ChampQuill name={champ.code_interne} value={valeur} onChange={onChange} />
+            </Col>
         )
     } else {
-        return <p>Type de champ non supporte</p>
+        return <Col><p>Type de champ non supporte</p></Col>
     }
 
+}
+
+function GenerateurMotsdepasse(props) {
+
+    const { name, onChange } = props
+
+    const generer = useCallback(()=>{
+        const randomBytes = getRandom(14)
+        const valeur = new TextDecoder().decode(multibase.encode('base64', randomBytes)).slice(1)
+        console.debug("Valeur : ", valeur)
+        onChange({currentTarget: {name, value: valeur}})
+    }, [onChange])
+
+    const propsButton = {
+        ...props,
+        // Overrides
+        onChange: undefined, 
+        onClick: undefined,
+    }
+
+    return (
+        <Button {...propsButton} onClick={generer}>Generer</Button>
+    )
 }
