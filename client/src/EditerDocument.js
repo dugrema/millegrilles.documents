@@ -152,20 +152,29 @@ function ChampInput(props) {
     if(typeChamp === 'text') {
         return (
             <Col>
-                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+                <Form.Control 
+                    name={champ.code_interne} value={valeur} onChange={onChange} 
+                    inputMode='text'
+                    autoComplete='off' autoCorrect='off' autoCapitalize='off' spellCheck='false' />
             </Col>
         )
     } else if(typeChamp === 'number') {
         return (
             <Col>
-                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+                <Form.Control 
+                    name={champ.code_interne} value={valeur} onChange={onChange} 
+                    inputMode='decimal'
+                    autoComplete='off' autoCorrect='off' autoCapitalize='off' spellCheck='false' />
             </Col>
         )
     } else if(typeChamp === 'password') {
         return (
             <>
                 <Col>
-                    <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+                    <Form.Control 
+                        name={champ.code_interne} value={valeur} onChange={onChange} 
+                        inputMode='text'
+                        autoComplete='new-password' autoCorrect='off' autoCapitalize='off' spellCheck='false' />
                 </Col>
                 <Col xs={4} sm={3} md={2} xxl={1}>
                     <GenerateurMotsdepasse variant='secondary' name={champ.code_interne} onChange={onChange} />
@@ -175,7 +184,10 @@ function ChampInput(props) {
     } else if(typeChamp === 'url') {
         return (
             <Col>
-                <Form.Control name={champ.code_interne} value={valeur} onChange={onChange} />
+                <Form.Control 
+                    name={champ.code_interne} value={valeur} onChange={onChange} 
+                    inputMode='url'
+                    autoComplete='off' autoCorrect='off' autoCapitalize='off' spellCheck='false' />
             </Col>
         )
     } else if(typeChamp === 'html') {
