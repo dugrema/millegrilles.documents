@@ -70,9 +70,7 @@ function MasqueContenu(props) {
         return (
             <Row key={idx}>
                 <Col xs={12} {...colWidth}>{item.nom_champ}</Col>
-                <Col>
-                    <AfficherChamp champ={item} valeur={valeurContenu} />
-                </Col>
+                <AfficherChamp champ={item} valeur={valeurContenu} />
             </Row>
         )
     })
@@ -90,7 +88,9 @@ function AfficherChamp(props) {
         )
     } else if(typeChamp === 'number') {
         return (
-            <p>{valeur}</p>
+            <Col>
+                <p>{valeur}</p>
+            </Col>
         )
     } else if(typeChamp === 'password') {
         return (
@@ -98,21 +98,23 @@ function AfficherChamp(props) {
         )
     } else if(typeChamp === 'url') {
         return (
-            <p>{valeur}</p>
+            <ChampTexteCopier value={valeur} openUrl={true} />
         )
     } else if(typeChamp === 'html') {
         return (
-            <ChampQuill value={valeur} readonly={true} />
+            <Col>
+                <ChampQuill value={valeur} readonly={true} />
+            </Col>
         )
     } else {
-        return <p>Type de champ non supporte</p>
+        return <Col><p>Type de champ non supporte</p></Col>
     }
 
 }
 
 function ChampTexteCopier(props) {
 
-    const { className, value } = props
+    const { className, value, openUrl } = props
 
     const [copie, setCopie] = useState(false)
 
@@ -128,15 +130,27 @@ function ChampTexteCopier(props) {
             .catch(err=>console.error("ChampTexteCopier Erreur ", err))
     }, [value, setCopie])
 
-    let classNameEffectif = className
+    const openUrlHandler = useCallback(()=>{
+        window.open(value, '_blank', 'noopener=true,noreferrer=true')
+    }, [value])
+
+    let classNameEffectif = className + ' champ-copiable'
     if(copie) classNameEffectif += ' copie'
 
     return (
-        <p className={classNameEffectif} onClick={copierClipboard}>
-            {value}
-            {' '}
-            {copie?<i className='fa fa-check'/>:''}
-        </p>
+        <>
+            <Col>
+                <p className={classNameEffectif} onClick={copierClipboard}>
+                    {value}
+                    {' '}
+                    {openUrl?(
+                        <Button variant='secondary' onClick={openUrlHandler}><i className='fa fa-external-link'/></Button>
+                    ):''}
+                    {' '}
+                    {copie?<i className='fa fa-check'/>:''}
+                </p>
+            </Col>
+        </>
     )
 
 }
