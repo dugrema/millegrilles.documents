@@ -1,5 +1,6 @@
 import { expose } from 'comlink'
 import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClient'
+import { MESSAGE_KINDS } from '@dugrema/millegrilles.utiljs/src/constantes'
 
 const CONST_DOMAINE_DOCUMENTS = 'Documents',
       CONST_DOMAINE_MAITREDESCLES = 'MaitreDesCles'
@@ -10,6 +11,7 @@ function getCategoriesUsager(requete) {
     'getCategoriesUsager', 
     requete, 
     {
+      kind: MESSAGE_KINDS.KIND_REQUETE, 
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'getCategoriesUsager', 
       ajouterCertificat: true,
@@ -23,6 +25,7 @@ function getGroupesUsager(requete) {
     'getGroupesUsager', 
     requete, 
     {
+      kind: MESSAGE_KINDS.KIND_REQUETE, 
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'getGroupesUsager', 
       ajouterCertificat: true,
@@ -40,7 +43,7 @@ async function getClesGroupes(liste_hachage_bytes) {
   return ConnexionClient.emitBlocking(
     'getClesGroupes', 
     params, 
-    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
+    {kind: MESSAGE_KINDS.KIND_REQUETE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
   )
 }
 
@@ -53,7 +56,7 @@ async function getDocumentsGroupe(groupe_id) {
   return ConnexionClient.emitBlocking(
     'getDocumentsGroupe', 
     params, 
-    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'getDocumentsGroupe', ajouterCertificat: true}
+    {kind: MESSAGE_KINDS.KIND_REQUETE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'getDocumentsGroupe', ajouterCertificat: true}
   )
 }
 
@@ -62,6 +65,7 @@ function sauvegarderCategorieUsager(categorie) {
     'sauvegarderCategorieUsager', 
     categorie, 
     {
+      kind: MESSAGE_KINDS.KIND_COMMANDE, 
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'sauvegarderCategorieUsager', 
       ajouterCertificat: true,
@@ -71,18 +75,15 @@ function sauvegarderCategorieUsager(categorie) {
 
 function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
 
-  const commandeCombinee = {...commande}
-  if(commandeMaitrecles) {
-    commandeCombinee['_commandeMaitrecles'] = commandeMaitrecles
-  }
-
   return ConnexionClient.emitBlocking(
     'sauvegarderGroupeUsager', 
-    commandeCombinee,
+    commande,
     {
+      kind: MESSAGE_KINDS.KIND_COMMANDE, 
       domaine: CONST_DOMAINE_DOCUMENTS, 
       action: 'sauvegarderGroupeUsager', 
       ajouterCertificat: true,
+      attachements: {cle: commandeMaitrecles}
     }
   )
 }
@@ -91,7 +92,7 @@ function sauvegarderDocument(doc) {
   return ConnexionClient.emitBlocking(
     'sauvegarderDocument', 
     doc,
-    {domaine: CONST_DOMAINE_DOCUMENTS, action: 'sauvegarderDocument', ajouterCertificat: true}
+    {kind: MESSAGE_KINDS.KIND_COMMANDE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'sauvegarderDocument', ajouterCertificat: true}
   )
 }
 
