@@ -18,13 +18,13 @@ export async function connecter(workers, setUsagerState, setEtatConnexion, setEt
     const setEtatFormatteurMessageCb = proxy(setEtatFormatteurMessage)
     await connexion.setCallbacks(setEtatConnexionCb, setUsagerCb, setEtatFormatteurMessageCb)
 
-    try {
-        const axiosImport = await import('axios')
-        const axios = axiosImport.default
-        await axios.get('/documents/initSession')
-    } catch(err) {
-        console.error("Erreur init session : %O", err)
-    }
+    // try {
+    //     const axiosImport = await import('axios')
+    //     const axios = axiosImport.default
+    //     await axios.get('/documents/initSession')
+    // } catch(err) {
+    //     console.error("Erreur init session : %O", err)
+    // }
 
     return connexion.connecter(location.href, {DEBUG: false})
 }

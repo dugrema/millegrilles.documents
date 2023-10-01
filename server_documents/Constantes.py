@@ -1,6 +1,6 @@
 
 APP_NAME = 'documents'
-DOMAINE_NOM = 'documents'
+NOM_DOMAINE = 'Documents'
 
 WEBAPP_PATH = '/documents'
 

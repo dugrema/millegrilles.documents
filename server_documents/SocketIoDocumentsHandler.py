@@ -4,7 +4,7 @@ import json
 from typing import Optional
 
 from millegrilles_messages.messages import Constantes
-from millegrilles_web.SocketIoHandler import SocketIoHandler
+from millegrilles_web.SocketIoHandler import SocketIoHandler, ErreurAuthentificationMessage
 from server_documents import Constantes as ConstantesDocuments
 
 
@@ -17,39 +17,160 @@ class SocketIoDocumentsHandler(SocketIoHandler):
         await super()._preparer_socketio_events()
 
         # Instances
-        # self._sio.on('requeteListeNoeuds', handler=self.requete_liste_noeuds)
+        self._sio.on('getCategoriesUsager', handler=self.requete_categories_usager)
+        self._sio.on('getGroupesUsager', handler=self.requete_groupes_usager)
+        self._sio.on('getDocumentsGroupe', handler=self.requete_documents_groupe)
+        self._sio.on('getClesGroupes', handler=self.requete_cles_groupes)
+        self._sio.on('sauvegarderCategorieUsager', handler=self.sauvegarder_categorie_usager)
+        self._sio.on('sauvegarderGroupeUsager', handler=self.sauvegarder_groupe_usager)
+        self._sio.on('sauvegarderDocument', handler=self.sauvegarder_document)
 
-    # async def ecouter_consignation(self, sid: str, message: dict):
-    #     pass
+        # Listeners
+        self._sio.on('ecouterEvenementsCategoriesUsager', handler=self.ecouter_categories_usager)
+        self._sio.on('retirerEvenementsCategoriesUsager', handler=self.retirer_categories_usager)
+        self._sio.on('ecouterEvenementsGroupesUsager', handler=self.ecouter_groupes_usager)
+        self._sio.on('retirerEvenementsGroupesUsager', handler=self.retirer_groupes_usager)
+        self._sio.on('ecouterEvenementsDocumentsUsager', handler=self.ecouter_documents_usager)
+        self._sio.on('retirerEvenementsDocumentsUsager', handler=self.retirer_documents_usager)
 
-    # async def ecouter_consignation(self, sid: str, message: dict):
-    #     enveloppe = await self.etat.validateur_message.verifier(message)
-    #     if enveloppe.get_delegation_globale != Constantes.DELEGATION_GLOBALE_PROPRIETAIRE:
-    #         return {'ok': False, 'err': 'Acces refuse'}
-    #
-    #     exchanges = [Constantes.SECURITE_PRIVE]
-    #     routing_keys = [
-    #         'evenement.fichiers.presence',
-    #         'evenement.fichiers.syncPrimaire',
-    #         'evenement.fichiers.syncSecondaire',
-    #         'evenement.fichiers.syncUpload',
-    #         'evenement.fichiers.syncDownload',
-    #         'evenement.CoreTopologie.changementConsignationPrimaire',
-    #     ]
-    #     reponse = await self.subscribe(sid, message, routing_keys, exchanges, enveloppe=enveloppe)
-    #     reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
-    #     return reponse_signee
-    #
-    # async def retirer_consignation(self, sid: str, message: dict):
-    #     exchanges = [Constantes.SECURITE_PRIVE]
-    #     routing_keys = [
-    #         'evenement.fichiers.presence',
-    #         'evenement.fichiers.syncPrimaire',
-    #         'evenement.fichiers.syncSecondaire',
-    #         'evenement.fichiers.syncUpload',
-    #         'evenement.fichiers.syncDownload',
-    #         'evenement.CoreTopologie.changementConsignationPrimaire',
-    #     ]
-    #     reponse = await self.unsubscribe(sid, message, routing_keys, exchanges)
-    #     reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
-    #     return reponse_signee
+    @property
+    def exchange_default(self):
+        return ConstantesDocuments.EXCHANGE_DEFAUT
+
+    async def requete_categories_usager(self, sid: str, message: dict):
+        return await self.executer_requete(sid, message,
+                                           ConstantesDocuments.NOM_DOMAINE, 'getCategoriesUsager')
+
+    async def requete_groupes_usager(self, sid: str, message: dict):
+        return await self.executer_requete(sid, message,
+                                           ConstantesDocuments.NOM_DOMAINE, 'getGroupesUsager')
+
+    async def requete_documents_groupe(self, sid: str, message: dict):
+        return await self.executer_requete(sid, message,
+                                           ConstantesDocuments.NOM_DOMAINE, 'getDocumentsGroupe')
+
+    async def requete_cles_groupes(self, sid: str, message: dict):
+        return await self.executer_requete(sid, message,
+                                           ConstantesDocuments.NOM_DOMAINE, 'getClesGroupes')
+
+    async def sauvegarder_categorie_usager(self, sid: str, message: dict):
+        return await self.executer_commande(sid, message,
+                                            ConstantesDocuments.NOM_DOMAINE, 'sauvegarderCategorieUsager')
+
+    async def sauvegarder_groupe_usager(self, sid: str, message: dict):
+        return await self.executer_commande(sid, message,
+                                            ConstantesDocuments.NOM_DOMAINE, 'sauvegarderGroupeUsager')
+
+    async def sauvegarder_document(self, sid: str, message: dict):
+        return await self.executer_commande(sid, message,
+                                            ConstantesDocuments.NOM_DOMAINE, 'sauvegarderDocument')
+
+    # Listeners
+
+    async def ecouter_categories_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderCategorieUsager'
+        ]
+        reponse = await self.subscribe(sid, message, routing_keys, exchanges, enveloppe=enveloppe)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee
+
+    async def retirer_categories_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderCategorieUsager'
+        ]
+        reponse = await self.unsubscribe(sid, message, routing_keys, exchanges)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee
+
+    async def ecouter_groupes_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderGroupeUsager'
+        ]
+        reponse = await self.subscribe(sid, message, routing_keys, exchanges, enveloppe=enveloppe)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee
+
+    async def retirer_groupes_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderGroupeUsager'
+        ]
+        reponse = await self.unsubscribe(sid, message, routing_keys, exchanges)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee
+
+    async def ecouter_documents_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderDocument'
+        ]
+        reponse = await self.subscribe(sid, message, routing_keys, exchanges, enveloppe=enveloppe)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee
+
+    async def retirer_documents_usager(self, sid: str, message: dict):
+        async with self._sio.session(sid) as session:
+            try:
+                enveloppe = await self.authentifier_message(session, message)
+            except ErreurAuthentificationMessage as e:
+                return self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, {'ok': False, 'err': str(e)})[0]
+
+        user_id = enveloppe.get_user_id
+
+        exchanges = [Constantes.SECURITE_PRIVE]
+        routing_keys = [
+            f'evenement.Documents.{user_id}.sauvegarderDocument'
+        ]
+        reponse = await self.unsubscribe(sid, message, routing_keys, exchanges)
+        reponse_signee, correlation_id = self.etat.formatteur_message.signer_message(Constantes.KIND_REPONSE, reponse)
+
+        return reponse_signee

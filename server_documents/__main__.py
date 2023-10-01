@@ -48,9 +48,9 @@ async def demarrer():
     signal.signal(signal.SIGTERM, main_inst.exit_gracefully)
 
     await main_inst.configurer()
-    logger.info("Run main coupdoeil")
+    logger.info("Run main documents")
     await main_inst.run()
-    logger.info("Fin main coupdoeil")
+    logger.info("Fin main documents")
 
 
 def main():
