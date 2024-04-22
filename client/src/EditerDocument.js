@@ -50,18 +50,20 @@ function EditerDocument(props) {
 
     const sauvegarderHandler = useCallback(event=>{
         console.debug("sauvegarder : %O dans groupe %O, categorie: %O", contenuDocument, groupe, categorie)
-        const ref_hachage_bytes = groupe.ref_hachage_bytes
+        const cleId = groupe.cle_id || groupe.ref_hachage_bytes
         const commande = {
             groupe_id: groupe.groupe_id,
             categorie_version: categorie.version,
         }
         if(docId && docId !== true) commande.doc_id = docId
         
-        workers.clesDao.getCles(ref_hachage_bytes)
+        workers.clesDao.getCles(cleId)
             .then( async cle => {
-                cle = cle[ref_hachage_bytes]
+                cle = cle[cleId]
                 console.debug("Cle pour chiffrer document : ", cle)
-                const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(contenuDocument, cle.cleSecrete)
+                // const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(contenuDocument, cle.cleSecrete)
+                const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(
+                    contenuDocument, cle.cleSecrete, cleId)
                 console.debug("Champs chiffres ", champsChiffres)
                 Object.assign(commande, champsChiffres)
 

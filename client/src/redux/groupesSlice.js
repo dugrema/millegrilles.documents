@@ -201,16 +201,17 @@ function creerThunks(actions) {
         console.debug("Groupes chiffres : ", groupesChiffres)
 
         // Detecter les cles requises
-        const liste_hachage_bytes = groupesChiffres.map(item=>item.ref_hachage_bytes)
-        if(liste_hachage_bytes && liste_hachage_bytes.length > 0) {
+        const cleIds = groupesChiffres.map(item=>item.cle_id || item.ref_hachage_bytes)
+        if(cleIds && cleIds.length > 0) {
             try {
-                const cles = await clesDao.getCles(liste_hachage_bytes)
+                const cles = await clesDao.getCles(cleIds)
                 console.debug("Cles recues : ", cles)
                 for await (const groupe of groupesChiffres) {
-                    let cleMetadata = cles[groupe.ref_hachage_bytes]
+                    const cleId = groupe.cle_id || groupe.ref_hachage_bytes
+                    let cleMetadata = cles[cleId]
                     if(cleMetadata) {
                         try {
-                            const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(groupe, cleMetadata)
+                            const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsV2(groupe, cleMetadata.cleSecrete)
                             console.debug("Meta dechiffree : ", metaDechiffree)
                             const groupeMaj = {
                                 ...metaDechiffree, 
@@ -227,7 +228,7 @@ function creerThunks(actions) {
                 }
         
             } catch(err) {
-                console.error("Erreur chargement cles %O : %O", liste_hachage_bytes, err)
+                console.error("Erreur chargement cles %O : %O", cleIds, err)
             }
         }
 

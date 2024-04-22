@@ -1,19 +1,17 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
-import { proxy as comlinkProxy } from 'comlink'
+import React, { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-import useWorkers, { useEtatPret } from './WorkerContext'
-import { setGroupeId, pushItems, mergeItems, clearItems } from './redux/groupesSlice'
+import useWorkers from './WorkerContext'
+import { setGroupeId } from './redux/groupesSlice'
 
 const EditerGroupe = React.lazy( () => import('./EditerGroupe') )
 
 function AfficherGroupes(props) {
 
-    const workers = useWorkers()
     const dispatch = useDispatch()
     
     // Categories et groupes charges sous App.js/ApplicationDocuments
@@ -29,35 +27,6 @@ function AfficherGroupes(props) {
 
     const nouveauGroupeHandler = useCallback(()=>dispatch(setGroupeId(true)), [dispatch])
     const fermerEditerGroupeHandler = useCallback(()=>dispatch(setGroupeId('')), [dispatch])
-
-    // const groupesMajHandler = useCallback(comlinkProxy(message => {
-    //     dispatch(mergeItems(message.message))
-    //   }), [dispatch])
-    
-    // useEffect(()=>{
-    //     if(!etatPret) return
-
-    //     workers.connexion.getGroupesUsager()
-    //         .then(reponse=>{
-    //             console.debug("Reponse : ", reponse)
-    //             if(reponse.groupes) {
-    //                 return dispatch(pushItems({liste: reponse.groupes, clear: true}))
-    //             } else {
-    //                 dispatch(clearItems())
-    //             }
-    //         })
-    //         .catch(err=>console.error("Erreur chargement groupes : ", err))
-
-
-    //     workers.connexion.ecouterEvenementsGroupesUsager(groupesMajHandler)
-    //         .catch(err=>console.error("Erreur ecouterEvenementsGroupesUsager ", err))
-
-    //     return () => { 
-    //         workers.connexion.retirerEvenementsGroupesUsager()
-    //             .catch(err=>console.warn("Erreur retrait listener groupes ", err))
-    //     }
-      
-    // }, [workers, dispatch, etatPret, groupesMajHandler])
 
     if(groupe) {
         return (

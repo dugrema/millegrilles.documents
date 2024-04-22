@@ -216,25 +216,26 @@ function creerThunks(actions) {
         try {
             // Identifier ref_hachages_bytes des cles
             const groupesParId = groupes.reduce((acc, item)=>{
-                acc[item.groupe_id] = item.ref_hachage_bytes
+                acc[item.groupe_id] = item.cle_id || item.ref_hachage_bytes
                 return acc
             }, {})
-            let refHachageBytesRequis = documentsChiffres.reduce((acc, item)=>{
-                const ref_hachage_bytes = groupesParId[item.groupe_id]
-                if(ref_hachage_bytes) acc[ref_hachage_bytes] = true
+            let cleIdsRequis = documentsChiffres.reduce((acc, item)=>{
+                const cleId = groupesParId[item.groupe_id]
+                if(cleId) acc[cleId] = true
                 return acc
             }, {})
-            const liste_hachage_bytes = Object.keys(refHachageBytesRequis)
+            const listeCleIds = Object.keys(cleIdsRequis)
 
-            const cles = await clesDao.getCles(liste_hachage_bytes)
+            const cles = await clesDao.getCles(listeCleIds)
             console.debug("Cles recues : ", cles)
 
             for await (const docDocument of documentsChiffres) {
-                const ref_hachage_bytes = groupesParId[docDocument.groupe_id]
-                let cleMetadata = cles[ref_hachage_bytes]
+                const cleId = groupesParId[docDocument.groupe_id]
+                let cleMetadata = cles[cleId]
                 if(cleMetadata) {
                     try {
-                        const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(docDocument, cleMetadata)
+                        // const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsChiffres(docDocument, cleMetadata)
+                        const metaDechiffree = await workers.chiffrage.chiffrage.dechiffrerChampsV2(docDocument, cleMetadata.cleSecrete)
                         console.debug("Meta dechiffree : ", metaDechiffree)
                         const groupeMaj = {
                             ...metaDechiffree, 

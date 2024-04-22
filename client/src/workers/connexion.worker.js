@@ -1,13 +1,13 @@
 import { expose } from 'comlink'
-import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClient'
+// import * as ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClient'
+import ConnexionClient from '@dugrema/millegrilles.reactjs/src/connexionClientV2'
 import { MESSAGE_KINDS } from '@dugrema/millegrilles.utiljs/src/constantes'
 
-const CONST_DOMAINE_DOCUMENTS = 'Documents',
-      CONST_DOMAINE_MAITREDESCLES = 'MaitreDesCles'
+const CONST_DOMAINE_DOCUMENTS = 'Documents'
 
 function getCategoriesUsager(requete) {
   requete = requete || {}
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'getCategoriesUsager', 
     requete, 
     {
@@ -21,7 +21,7 @@ function getCategoriesUsager(requete) {
 
 function getGroupesUsager(requete) {
   requete = requete || {}
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'getGroupesUsager', 
     requete, 
     {
@@ -33,14 +33,14 @@ function getGroupesUsager(requete) {
   )
 }
 
-async function getClesGroupes(liste_hachage_bytes) {
+async function getClesGroupes(cleIds) {
 
   const params = {
-    liste_hachage_bytes,
+    cle_ids: cleIds,
     domaine: CONST_DOMAINE_DOCUMENTS,
   }
 
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'getClesGroupes', 
     params, 
     {kind: MESSAGE_KINDS.KIND_REQUETE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'getClesGroupes', ajouterCertificat: true}
@@ -53,7 +53,7 @@ async function getDocumentsGroupe(groupe_id) {
     groupe_id,
   }
 
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'getDocumentsGroupe', 
     params, 
     {kind: MESSAGE_KINDS.KIND_REQUETE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'getDocumentsGroupe', ajouterCertificat: true}
@@ -61,7 +61,7 @@ async function getDocumentsGroupe(groupe_id) {
 }
 
 function sauvegarderCategorieUsager(categorie) {
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'sauvegarderCategorieUsager', 
     categorie, 
     {
@@ -75,7 +75,7 @@ function sauvegarderCategorieUsager(categorie) {
 
 function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
 
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'sauvegarderGroupeUsager', 
     commande,
     {
@@ -89,7 +89,7 @@ function sauvegarderGroupeUsager(commande, commandeMaitrecles) {
 }
 
 function sauvegarderDocument(doc) {
-  return ConnexionClient.emitBlocking(
+  return ConnexionClient.emitWithAck(
     'sauvegarderDocument', 
     doc,
     {kind: MESSAGE_KINDS.KIND_COMMANDE, domaine: CONST_DOMAINE_DOCUMENTS, action: 'sauvegarderDocument', ajouterCertificat: true}

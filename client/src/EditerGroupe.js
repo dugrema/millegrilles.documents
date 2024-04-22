@@ -1,13 +1,11 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useState, useCallback, useMemo } from 'react'
 
 import Button from 'react-bootstrap/Button'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 
-import useWorkers, { useEtatPret, useUsager } from './WorkerContext'
-import { pushItems, clearItems } from './redux/categoriesSlice'
+import useWorkers, { useUsager } from './WorkerContext'
 
 function EditerGroupe(props) {
     
@@ -71,31 +69,37 @@ function FormGroupe(props) {
 
                 if(groupe.groupe_id) {
                     commande.groupe_id = groupe.groupe_id
-                } 
+                }
+                
+                let cleId = groupe.cle_id || groupe.ref_hachage_bytes
                 
                 let commandeMaitrecles = null
                 if(!groupe.groupe_id) {
                     // Nouveau groupe - creer la cle
                     const certificatsChiffrage = await workers.connexion.getCertificatsMaitredescles()
-                    const identificateurs_document = {'type': 'groupe'}
+                    // const identificateurs_document = {'type': 'groupe'}
 
-                    const {doc: metadataChiffre, commandeMaitrecles: _commandeMaitrecles} = await workers.chiffrage.chiffrerDocument(
-                        metadataDechiffre, 'Documents', certificatsChiffrage, {identificateurs_document, userId, DEBUG: true})
+                    // const {doc: metadataChiffre, commandeMaitrecles: _commandeMaitrecles} = await workers.chiffrage.chiffrerDocument(
+                    //     metadataDechiffre, 'Documents', certificatsChiffrage, {identificateurs_document, userId, DEBUG: true})
+
+                    const {doc: metadataChiffre, commandeMaitrecles: _commandeMaitrecles} = await workers.chiffrage.chiffrerChampsV2(
+                        metadataDechiffre, 'Documents', certificatsChiffrage, {DEBUG: false})
 
                     // Conserver information chiffree
                     Object.assign(commande, metadataChiffre)
 
                     console.debug("Commande maitre des cles : %O", _commandeMaitrecles)
                     commandeMaitrecles = _commandeMaitrecles
-                } else if(groupe.ref_hachage_bytes) {
+                } else if(cleId) {
                     commande.groupe_id = groupe.groupe_id
-                    commande.ref_hachage_bytes = groupe.ref_hachage_bytes
+                    commande.cleId = cleId
 
                     // Recuperer cle pour re-chiffrer
-                    let cle = await workers.clesDao.getCles(groupe.ref_hachage_bytes)
-                    cle = cle[groupe.ref_hachage_bytes]
+                    let cle = await workers.clesDao.getCles(cleId)
+                    cle = cle[cleId]
 
-                    const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(metadataDechiffre, cle.cleSecrete)
+                    const champsChiffres = await workers.chiffrage.chiffrage.updateChampsChiffres(
+                        metadataDechiffre, cle.cleSecrete, cleId)
                     Object.assign(commande, champsChiffres)
                 } else {
                     throw new Error('Cle manquante')

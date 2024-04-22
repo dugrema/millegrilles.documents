@@ -1,3 +1,5 @@
+import multibase from 'multibase'
+
 const CONST_TIMEOUT_CERTIFICAT = 2 * 60 * 1000
 
 function build(workers) {
@@ -48,21 +50,22 @@ async function getCles(workers, liste_hachage_bytes) {
     if(clesManquantes.length > 0) {
         // Recuperer les cles du serveur
         const reponseClesChiffrees = await connexion.getClesGroupes(liste_hachage_bytes)
-        // console.debug("getCles reponseClesChiffrees ", reponseClesChiffrees)
-        for await(const cleHachage_bytes of Object.keys(reponseClesChiffrees.cles)) {
-            const infoCle = reponseClesChiffrees.cles[cleHachage_bytes]
-            const cleSecrete = await chiffrage.dechiffrerCleSecrete(infoCle.cle)
+        console.debug("getCles reponseClesChiffrees ", reponseClesChiffrees)
+        for (const infoCle of reponseClesChiffrees.cles) {
+            const cleId = infoCle.cle_id
+            // const cleSecrete = await chiffrage.dechiffrerCleSecrete(infoCle.cle)
+            const cleSecrete = multibase.decode('m' + infoCle.cle_secrete_base64)
 
             infoCle.cleSecrete = cleSecrete
-            delete infoCle.cle  // Supprimer cle chiffree
+            delete infoCle.cle_secrete_base64
 
             // Sauvegarder la cle pour reutilisation
-            usagerDao.saveCleDechiffree(cleHachage_bytes, cleSecrete, infoCle)
+            usagerDao.saveCleDechiffree(cleId, cleSecrete, infoCle)
                 .catch(err=>{
                     console.warn("clesDao.getCles Erreur sauvegarde cle dechiffree %s dans la db locale", err)
                 })
         
-            clesDechiffrees[cleHachage_bytes] = infoCle
+            clesDechiffrees[cleId] = infoCle
         }
     }
 

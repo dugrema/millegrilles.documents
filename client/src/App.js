@@ -189,6 +189,7 @@ function ApplicationDocuments(props) {
 
   return (
     <Container className="main-body">
+      <br/><br/>
       <Page setSectionAfficher={setSectionAfficher} />
     </Container>
   )
